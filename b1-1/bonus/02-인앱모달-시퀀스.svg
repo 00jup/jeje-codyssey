@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="620" viewBox="0 0 980 620" font-family="'Apple SD Gothic Neo','Noto Sans KR',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5856D6"/>
+      <stop offset="1" stop-color="#546E7A"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef0fb"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 z" fill="#ffffff"/>
+    </marker>
+  </defs>
+
+  <rect width="980" height="620" fill="url(#bg)"/>
+  <text x="40" y="56" fill="#ffffff" font-size="28" font-weight="700">Mirror Mirror — 인앱 모달 시퀀스</text>
+  <text x="40" y="84" fill="#dfe3f7" font-size="15">오픈 횟수 × 사용자 상태 기반 결정 · 무료·무계정 → 페이월·로그인 모달 없음</text>
+
+  <!-- nodes -->
+  <!-- open 1 -->
+  <g>
+    <rect x="40" y="120" width="200" height="120" rx="16" fill="url(#card)"/>
+    <text x="60" y="150" fill="#5856D6" font-size="15" font-weight="700">오픈 1회 · 항상</text>
+    <text x="60" y="178" fill="#1b1b2f" font-size="18" font-weight="700">온보딩</text>
+    <text x="60" y="202" fill="#3a3a55" font-size="13">무반전 개념 2컷</text>
+    <text x="60" y="222" fill="#7a7a95" font-size="12">권한·구매 없이 가치 먼저</text>
+  </g>
+  <!-- open 2 -->
+  <g>
+    <rect x="280" y="120" width="200" height="120" rx="16" fill="url(#card)"/>
+    <text x="300" y="150" fill="#5856D6" font-size="15" font-weight="700">오픈 2회 · 기능 미사용</text>
+    <text x="300" y="178" fill="#1b1b2f" font-size="18" font-weight="700">기능 발견</text>
+    <text x="300" y="202" fill="#3a3a55" font-size="13">PiP 스왑·가로·줌</text>
+    <text x="300" y="222" fill="#7a7a95" font-size="12">한 세션 1모달</text>
+  </g>
+  <!-- open 2~3 review -->
+  <g>
+    <rect x="520" y="120" width="200" height="120" rx="16" fill="url(#card)"/>
+    <text x="540" y="150" fill="#5856D6" font-size="15" font-weight="700">오픈 2~3회 · 조건부</text>
+    <text x="540" y="178" fill="#1b1b2f" font-size="18" font-weight="700">리뷰 요청</text>
+    <text x="540" y="202" fill="#3a3a55" font-size="13">거울 1회+ · 설치 3일+</text>
+    <text x="540" y="222" fill="#c0392b" font-size="12">365일 3회 한도 · 긍정 순간만</text>
+  </g>
+  <!-- value moment share -->
+  <g>
+    <rect x="760" y="120" width="200" height="120" rx="16" fill="url(#card)"/>
+    <text x="780" y="150" fill="#5856D6" font-size="15" font-weight="700">가치 경험 직후 · 미공유</text>
+    <text x="780" y="178" fill="#1b1b2f" font-size="18" font-weight="700">공유</text>
+    <text x="780" y="202" fill="#3a3a55" font-size="13">시트 / QR</text>
+    <text x="780" y="222" fill="#7a7a95" font-size="12">자연 바이럴</text>
+  </g>
+
+  <!-- arrows -->
+  <line x1="240" y1="180" x2="278" y2="180" stroke="#ffffff" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="480" y1="180" x2="518" y2="180" stroke="#ffffff" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="720" y1="180" x2="758" y2="180" stroke="#ffffff" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- alarm note -->
+  <g>
+    <rect x="280" y="300" width="440" height="86" rx="14" fill="#ffffff" fill-opacity="0.14" stroke="#ffffff" stroke-opacity="0.5"/>
+    <text x="300" y="330" fill="#ffffff" font-size="15" font-weight="700">＋ 알림 권한 (앱에 알림 기능이 있을 때)</text>
+    <text x="300" y="354" fill="#e6e9f8" font-size="13">가치 경험 후 pre-permission("왜 켜면 좋은지") → 시스템 권한 다이얼로그</text>
+    <text x="300" y="374" fill="#cfd4ef" font-size="12">우선순위 충돌 시: 가치전달 &gt; 권한 &gt; 리뷰 &gt; 공유 — 한 회차 하나만</text>
+  </g>
+
+  <!-- gating principles -->
+  <g>
+    <rect x="40" y="430" width="900" height="150" rx="16" fill="#ffffff" fill-opacity="0.10" stroke="#ffffff" stroke-opacity="0.35"/>
+    <text x="64" y="462" fill="#ffffff" font-size="16" font-weight="700">게이팅 원칙</text>
+    <text x="64" y="492" fill="#eef0fb" font-size="13.5">① 한 세션 모달 1개 (스택 금지)　② 권한·구매·리뷰는 첫 실행 금지 (가치 경험 후)</text>
+    <text x="64" y="516" fill="#eef0fb" font-size="13.5">③ 빈도 제한(쿨다운) + 긍정 순간 트리거 + 부정 순간 금지　④ 완료한 액션은 재노출 안 함</text>
+    <text x="64" y="540" fill="#eef0fb" font-size="13.5">⑤ 닫기 쉬운 UI (다크패턴 금지)　⑥ 각 모달 노출·전환을 FA 이벤트로 측정</text>
+    <text x="64" y="566" fill="#cfd4ef" font-size="12">출처: prompts/system-prompt-v2.md · 2026-06-23</text>
+  </g>
+</svg>
