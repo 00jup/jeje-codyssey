@@ -8,7 +8,7 @@
 - 메인 = 무반전(True Mirror), PiP = 일반 거울
 - **실제 기능 그대로** 녹화 (과장 금지)
 
-## 비디오 / 제스처 합성 (Runway Gen-4)
+## 비디오 / 제스처 합성
 ```
 Screen-recording style demo of a mirror app on a phone: a large main view showing a non-flipped true reflection, with a small picture-in-picture window showing the ordinary mirror. Animate a finger tap swapping main and PiP views, then a drag gesture resizing the PiP window. Clean iOS UI, smooth 60fps-feel interactions, realistic hand, indigo (#5856D6) UI accents. 5 seconds.
 ```

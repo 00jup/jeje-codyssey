@@ -4,12 +4,12 @@
 > 공통: 9:16 (1080×1920) · 30fps · 인디고 `#5856D6` · 블루그레이 `#546E7A`
 > 출력: `S05_value_privacy.mp4`
 
-## 이미지 (Midjourney v7)
+## 이미지
 ```
 Vertical 9:16 portrait of a Korean person calmly studying their own true reflection, gently checking facial symmetry, confident and self-assured expression. Soft cinematic light, indigo (#5856D6) to blue-gray (#546E7A) tones, premium skincare-ad aesthetic, photorealistic, clean space for trust badges. --ar 9:16 --style raw --v 7
 ```
 
-## 모션 (CapCut)
+## 모션
 ```
 Animate three trust badges sliding in with soft glow: "로그인 없음", "저장 없음", "전면 카메라만". Minimal pill-shaped badges, indigo accent, subtle check-mark pulse. 5 seconds.
 ```

@@ -4,12 +4,12 @@
 > 공통: 9:16 (1080×1920) · 30fps · 인디고 `#5856D6` · 블루그레이 `#546E7A`
 > 출력: `S01_hook_mirror-vs-selfie.mp4`
 
-## 이미지 (Nano Banana / Gemini)
+## 이미지
 ```
 Vertical 9:16 cinematic portrait of a Korean person in their late 20s, looking slightly uncertain at their own reflection. Soft moody studio light, deep indigo (#5856D6) to blue-gray (#546E7A) background, shallow depth of field, photorealistic skin, calm but slightly puzzled expression — the micro-moment of "wait, is that really me?". Clean negative space top and bottom for captions. 8k, premium app key visual.
 ```
 
-## 비디오 / 모션 (Kling 2.0)
+## 비디오 / 모션
 ```
 Animate: the person's gaze shifts from a wall mirror to a phone selfie camera, a subtle double-take, eyes flicking back and forth, faint glass reflection shimmer. Slow push-in, cinematic, 4 seconds, natural micro-expressions, no exaggerated movement.
 ```

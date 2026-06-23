@@ -4,7 +4,7 @@
 > 공통: 9:16 (1080×1920) · 30fps · 인디고 `#5856D6` · 블루그레이 `#546E7A`
 > 출력: `S04_routine_10min-montage.mp4`
 
-## 비디오 / 몽타주 (Kling 2.0)
+## 비디오 / 몽타주
 ```
 Fast-cut vertical 9:16 montage of daily mirror moments: (1) a person applying light makeup in the morning, (2) checking hair/outfit before leaving for work, (3) finding the best angle before a selfie. Bright natural lighting, upbeat energetic pacing, quick whip-pan transitions between cuts, lifestyle commercial look, indigo (#5856D6) color grade accents. Total 5 seconds.
 ```
