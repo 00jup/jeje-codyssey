@@ -1,7 +1,7 @@
 # 모델 실행 결과 — Codex (GPT 계열)
 
 > 실행 방법: Codex CLI에서 `프롬프트-GPT-Gemini-붙여넣기.md`의 STEP 1 → STEP 2를 넣고, 아래에 결과를 그대로 붙여넣는다.
-> (Codex는 `~/.agents/skills/app-promotion-strategist/SKILL.md`로 프로모가 트리거되므로, STEP 1 대신 "프로모로 Mirror Mirror 작업 A·B 해줘"로도 가능. 단 **모델 비교는 STEP 1 동일 입력으로** 돌려야 공정하다.)
+> (Codex는 `~/.agents/skills/promo/SKILL.md`로 프로모가 트리거되므로, STEP 1 대신 "프로모로 Mirror Mirror 작업 A·B 해줘"로도 가능. 단 **모델 비교는 STEP 1 동일 입력으로** 돌려야 공정하다.)
 
 ## 재현성 기록 (필수)
 
@@ -11,7 +11,7 @@
 | 요금제 | 확인 필요 — 실행 환경에서 계정 요금제가 노출되지 않음 |
 | 사용 채널 | Codex CLI |
 | 사용 날짜 | 2026-06-23 |
-| 주요 설정 | Default mode, reasoning effort 미노출, `app-promotion-strategist` 스킬 적용 |
+| 주요 설정 | Default mode, reasoning effort 미노출, `promo` 스킬 적용 |
 | 무료 제한 1줄 | 확인 필요 — 계정의 Codex 사용량 화면에서 확인 |
 
 ## 작업 A — 한국 스토어 메타데이터

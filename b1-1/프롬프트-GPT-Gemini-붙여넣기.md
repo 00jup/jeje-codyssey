@@ -82,8 +82,8 @@ Codex·Gemini CLI는 파일을 쓸 수 있다. **`b1-1` 폴더에서 CLI를 열�
 
 ## 스킬 위치를 Codex / Gemini에 알리는 법
 
-프로모는 공용 스킬 경로 **`~/.agents/skills/app-promotion-strategist/SKILL.md`**에 있고, Codex·Gemini가 이 경로를 **자동 검색**한다(이름·설명으로 트리거).
+프로모는 공용 스킬 경로 **`~/.agents/skills/promo/SKILL.md`**에 있고, Codex·Gemini가 이 경로를 **자동 검색**한다(이름·설명으로 트리거).
 
-- **이름으로 호출(자동 인식 시)**: "**app-promotion-strategist** 스킬로 Mirror Mirror 작업 A·B 해줘."
-- **자동 인식이 안 될 때(확실한 방법)**: "**`~/.agents/skills/app-promotion-strategist/SKILL.md` 파일을 읽고 그 지침대로 행동해.** 그런 다음 …" — CLI가 파일을 직접 읽어 따른다.
+- **이름으로 호출(자동 인식 시)**: "**promo** 스킬로 Mirror Mirror 작업 A·B 해줘."
+- **자동 인식이 안 될 때(확실한 방법)**: "**`~/.agents/skills/promo/SKILL.md` 파일을 읽고 그 지침대로 행동해.** 그런 다음 …" — CLI가 파일을 직접 읽어 따른다.
 - **모델 비교 측정만큼은** 스킬 자동 트리거 대신 **STEP 1 블록을 통째로 붙여넣어** 3종 입력을 동일하게 맞춘다(공정성). 평소 사용은 스킬 자동 트리거로 충분하다.

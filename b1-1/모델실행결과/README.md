@@ -14,4 +14,4 @@
 2. 각 파일 하단 채점표(6축 1~5 + 근거)를 채운다.
 3. `../01-모델비교-선정보고서.md`의 GPT·Gemini 칸과 `../README.md` 재현성 표에 점수·기록을 옮긴다.
 
-> 공정성: 세 모델 모두 STEP 1 동일 입력으로 돌린다. Codex/Gemini는 `~/.agents/skills/app-promotion-strategist/SKILL.md`로 프로모가 자동 트리거되지만, **비교 측정은 STEP 1 통째 입력**으로 통일한다.
+> 공정성: 세 모델 모두 STEP 1 동일 입력으로 돌린다. Codex/Gemini는 `~/.agents/skills/promo/SKILL.md`로 프로모가 자동 트리거되지만, **비교 측정은 STEP 1 통째 입력**으로 통일한다.
