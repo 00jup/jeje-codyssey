@@ -350,8 +350,29 @@ def load_from_json(prompts):
     print(f"\n{JSON_PATH}에서 {len(prompts)}개의 프롬프트를 불러왔습니다.")
 
 
-def export_markdown(prompts):
-    print("(Markdown 내보내기 기능은 이후 커밋에서 구현 예정입니다)")
+def export_markdown(prompts, export_dir="export"):
+    print("\n=== 카테고리별 Markdown 내보내기 ===")
+    if not prompts:
+        print("등록된 프롬프트가 없습니다.")
+        return
+
+    os.makedirs(export_dir, exist_ok=True)
+    by_category = {}
+    for prompt in prompts:
+        by_category.setdefault(prompt["category"], []).append(prompt)
+
+    for category, items in by_category.items():
+        safe_name = category.replace(" ", "_").replace("/", "_")
+        path = os.path.join(export_dir, f"{safe_name}.md")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(f"# {category}\n\n")
+            for prompt in items:
+                star = " ⭐" if prompt["favorite"] else ""
+                f.write(f"## {prompt['title']}{star}\n\n")
+                f.write(f"{prompt['content']}\n\n")
+                f.write("---\n\n")
+
+    print(f"{len(by_category)}개 카테고리를 '{export_dir}/' 폴더에 내보냈습니다.")
 
 
 def main():
