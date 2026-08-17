@@ -165,8 +165,35 @@ def show_list(prompts):
     print(f"\n총 {len(prompts)}개의 프롬프트")
 
 
+def get_all_categories(prompts):
+    """미리 정의된 카테고리에 실제 등록된(직접 입력한) 카테고리를 이어붙인다."""
+    categories = list(CATEGORIES)
+    for prompt in prompts:
+        if prompt["category"] not in categories:
+            categories.append(prompt["category"])
+    return categories
+
+
 def show_by_category(prompts):
-    print("(카테고리별 조회 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 카테고리별 조회 ===")
+    categories = get_all_categories(prompts)
+    for i, name in enumerate(categories, 1):
+        print(f"{i}) {name}")
+    raw = input("선택: ").strip()
+    if not raw.isdigit() or not (1 <= int(raw) <= len(categories)):
+        print("잘못된 번호입니다.")
+        return
+
+    selected = categories[int(raw) - 1]
+    matched = [(i, p) for i, p in enumerate(prompts, 1) if p["category"] == selected]
+
+    print(f"\n[{selected}] 카테고리 프롬프트:")
+    if not matched:
+        print("해당 카테고리에 프롬프트가 없습니다.")
+        return
+    for i, prompt in matched:
+        print(format_prompt_line(i, prompt))
+    print(f"\n총 {len(matched)}개의 프롬프트")
 
 
 def search_prompt(prompts):
