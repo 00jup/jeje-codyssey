@@ -272,11 +272,43 @@ def show_favorites(prompts):
 
 
 def edit_prompt(prompts):
-    print("(프롬프트 수정 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 프롬프트 수정 ===")
+    raw = input("수정할 번호 입력: ").strip()
+    prompt = get_prompt_by_number(prompts, raw)
+    if prompt is None:
+        print("잘못된 번호입니다.")
+        return
+
+    print("변경하지 않으려면 빈 값으로 Enter를 누르세요.")
+    new_title = input(f"제목 [{prompt['title']}]: ").strip()
+    new_content = input(f"내용 [{prompt['content'][:20]}...]: ").strip()
+    change_category = input("카테고리를 변경하시겠습니까? (y/N): ").strip().lower()
+
+    if new_title:
+        prompt["title"] = new_title
+    if new_content:
+        prompt["content"] = new_content
+    if change_category == "y":
+        prompt["category"] = select_category()
+
+    print("\n프롬프트가 수정되었습니다!")
 
 
 def delete_prompt(prompts):
-    print("(프롬프트 삭제 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 프롬프트 삭제 ===")
+    raw = input("삭제할 번호 입력: ").strip()
+    prompt = get_prompt_by_number(prompts, raw)
+    if prompt is None:
+        print("잘못된 번호입니다.")
+        return
+
+    confirm = input(f"'{prompt['title']}'을(를) 삭제할까요? (y/N): ").strip().lower()
+    if confirm != "y":
+        print("삭제를 취소했습니다.")
+        return
+
+    prompts.remove(prompt)
+    print("프롬프트가 삭제되었습니다.")
 
 
 def show_top(prompts):
