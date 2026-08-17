@@ -1,46 +1,16 @@
 # 빌드 가이드 — 클릭해서 캡처만 하면 되게
 
 > 두 프로젝트의 실제 구현 단계. 순서대로 따라 만들고, 각 단계에서 **스크린샷**을 `./screenshots/`에 저장한다.
-> ⚠️ 모든 키·토큰·이메일은 캡처 전에 `***`로 가린다.
+> ⚠️ 모든 키·토큰·이메일·Apple ID는 캡처 전에 `***`로 가린다.
 
 ---
 
-## A. 공통 준비 — 카카오 '나에게 보내기' API (Project 1용)
+## A. 공통 준비 — Project 1은 별도 가입이 필요 없다
 
-본인 카톡 "나와의 채팅"으로 메시지를 보내는 API다. 친구 전송이 아니라 **본인 전송**이라 별도 검수가 필요 없다.
+Project 1의 두 도구(단축어, AppleScript+launchd)는 **둘 다 iMessage를 그대로 쓴다.** Mac/iPhone에 로그인된 Apple ID의 iMessage 계정을 그대로 이용하므로 카카오 개발자 앱 등록, OAuth, 토큰 발급 같은 절차가 전혀 없다. 확인할 건 두 가지뿐이다.
 
-1. [Kakao Developers](https://developers.kakao.com) 로그인 → **내 애플리케이션 → 애플리케이션 추가하기**
-2. 생성된 앱 → **앱 키**에서 `REST API 키` 확인 (캡처 시 마스킹)
-3. **카카오 로그인 → 활성화 ON**, **Redirect URI** 등록 (예: `https://localhost`)
-4. **카카오 로그인 → 동의항목**에서 `talk_message`(카카오톡 메시지 전송) 권한 ON
-5. **토큰 발급** (1회):
-   - 인가코드 받기(브라우저):
-     ```
-     https://kauth.kakao.com/oauth/authorize?client_id={REST_API_KEY}&redirect_uri=https://localhost&response_type=code&scope=talk_message
-     ```
-   - 리다이렉트 URL의 `code=` 값으로 토큰 교환:
-     ```bash
-     curl -X POST "https://kauth.kakao.com/oauth/token" \
-       -d "grant_type=authorization_code" \
-       -d "client_id={REST_API_KEY}" \
-       -d "redirect_uri=https://localhost" \
-       -d "code={인가코드}"
-     ```
-   - 응답의 `access_token`(약 6~12시간) · `refresh_token`(약 2개월) 보관
-6. **전송 테스트**:
-   ```bash
-   curl -X POST "https://kapi.kakao.com/v2/api/talk/memo/default/send" \
-     -H "Authorization: Bearer {ACCESS_TOKEN}" \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     --data-urlencode 'template_object={"object_type":"text","text":"테스트 메시지","link":{"web_url":"https://fns.tools"}}'
-   ```
-   → 카톡 "나와의 채팅"에 도착하면 성공.
-
-> **토큰 갱신**(access token 만료 시):
-> ```bash
-> curl -X POST "https://kauth.kakao.com/oauth/token" \
->   -d "grant_type=refresh_token" -d "client_id={REST_API_KEY}" -d "refresh_token={REFRESH_TOKEN}"
-> ```
+1. **설정 → 메시지 → iMessage 활성화** 확인 (Mac은 Messages.app → 설정 → iMessage 로그인 확인)
+2. 본인에게 테스트 iMessage를 한 번 보내 정상 수신되는지 확인
 
 ---
 
@@ -48,111 +18,168 @@
 
 ### B-1. 자동화(트리거) 만들기
 1. 단축어 앱 → **자동화 탭 → + → 개인용 자동화 생성**
-2. **특정 시각 → 오전 08:00 → 매일** 선택
+2. **특정 시각 → 오전 09:00 → 매주(요일 선택, 예: 수요일)** 선택
 3. 하단 **"실행 전에 묻기" 끄기 → "묻지 않음" / 즉시 실행** (무인 실행 핵심)
 
 ### B-2. 액션 구성
-1. **현재 날짜 가져오기** → **날짜 구성요소(요일)** 추출
-2. **만약(If)**: 요일이 `토요일` 또는 `일요일`이면
-   - (주말) **텍스트**: `🌿 주말입니다. 오늘 할 일 1개만 적어두기`
-   - (그 외 = 평일) **텍스트**: `📊 어제 총 사용자 / 다운로드 확인` (GA 1줄을 넣으려면 아래 B-3)
-3. **텍스트**(token 보관): `{ACCESS_TOKEN}` — 또는 refresh 호출 액션 먼저
-4. **URL의 콘텐츠 가져오기(Get Contents of URL)**:
-   - URL: `https://kapi.kakao.com/v2/api/talk/memo/default/send`
-   - 방식: `POST`
-   - 헤더: `Authorization` = `Bearer {ACCESS_TOKEN}`
-   - 본문: `양식(Form)` → `template_object` = `{"object_type":"text","text":"<위 분기 텍스트>","link":{"web_url":"https://fns.tools"}}`
+1. **텍스트** 액션: `True` 또는 `False` — 이번 주 진행 요일 스위치 (True=금요일 주 / False=토요일 주)
+2. **만약(If)**: `텍스트 is True`이면 → **메시지 보내기(Send Message)** 액션을 멘티 수만큼 추가 (금요일 시간표 문구)
+   - "규원 멘티! 이번 멘토링, 돌아오는 금요일 9시에 괜찮을까요?" → 삼드클 2026 황규원
+   - "민규 멘티! 이번 멘토링, 돌아오는 금요일 9시 30분에 괜찮을까요?" → 삼드클 2026 김민규
+   - "주원 멘티! 이번 멘토링, 돌아오는 금요일 10시에 괜찮을까요?" → 삼드클 2026 박주원
+   - "지강 멘티! 이번 멘토링, 돌아오는 금요일 10시 30분에 괜찮을까요?" → 삼드클 2026 박지강
+3. **그 외(Otherwise)**: 같은 멘티들에게 **토요일 시간표 문구**로 메시지 보내기 (토 11시 / 18시 / 18시 30분 / 19시 …)
 
-### B-3. (선택) 평일에 GA 1줄 넣기
-- 평일 경로에 **URL의 콘텐츠 가져오기** 하나 더 추가 → GA4 runReport(아래 D 참고) 호출 → 응답에서 `activeUsers` 추출 → 메시지 텍스트에 끼워넣기
+### B-3. (선택) 전체 공지 단축어 · 멘티 추가
+- 별도 단축어 "드림클래스 전체 멘토링 알림": 공지 문구를 변수(`GreetingMessages`)에 담아 멘티 전원에게 일괄 발송
+- 멘티가 늘면 각 분기의 **메시지 보내기** 액션을 복제해 수신자·문구만 바꾼다 — 이 "복제 편집"의 번거로움이 도구 B(목록+루프)와의 비교 포인트다
 
-> 📸 캡처: `p1-shortcuts-overview.png`, `p1-shortcuts-actions.png`, `p1-result-shortcuts-kakao.png`
+> 📸 캡처: `p1-shortcuts-overview.png`, `p1-shortcuts-actions.png`, `p1-result-shortcuts-imessage.png`
 
 ---
 
-## C. Project 1 — Make 구현
+## C. Project 1 — AppleScript + launchd 구현
 
-1. **새 시나리오** 생성
-2. **Schedule** 트리거 추가 → `Every day, 08:00`
-3. (토큰) 첫 모듈로 **HTTP > Make a request** → 카카오 token refresh 호출(또는 Connections에 카카오 OAuth2 커넥션 저장)
-4. **Tools > Set variable**: 오늘 요일 계산 (`formatDate(now; "dddd")`)
-5. **Router** 추가 → 두 경로:
-   - 경로 1 **Filter**: 요일 = 평일 → 메시지 = GA 1줄 (평일 경로에 GA4 조회 HTTP 모듈 추가)
-   - 경로 2 **Filter**: 요일 = 주말 → 메시지 = 리마인더
-6. 각 경로 끝에 **HTTP > Make a request**:
-   - URL: `https://kapi.kakao.com/v2/api/talk/memo/default/send` / `POST`
-   - Header: `Authorization: Bearer {{token}}`
-   - Body type: `application/x-www-form-urlencoded`, field `template_object` = 위 JSON
-7. **Run once**로 즉시 실행 테스트 → 실행 히스토리 확인
+> macOS에 원래 내장된 스크립트(`osascript`)와 스케줄러(`launchd`)만으로 만든다. 단축어가 "GUI 자동화 앱"이라면 이쪽은 "OS 내장 스크립트·데몬 스택"이다 — 이 차이가 비교 포인트.
 
-> 📸 캡처: `p1-make-scenario.png`, `p1-make-router.png`, `p1-result-make-history.png`, `p1-result-weekday.png`, `p1-result-weekend.png`
-
----
-
-## D. Project 2 — GA4 Data API 준비
-
-### D-1. Property ID 확인
-- GA4 → **관리 → 속성 설정**에서 각 속성의 **숫자 속성 ID**(예: `123456789`) 확인
-- MyMirror / fns 앱 / fns-web 세 개 모두
-
-### D-2. 인증 (둘 중 택1)
-- **(권장) 서비스 계정**: Google Cloud → 서비스 계정 생성 → JSON 키 발급 → 각 GA4 속성의 **관리 → 속성 액세스 관리**에 서비스 계정 이메일을 **뷰어**로 추가. 토큰 갱신 불필요
-- **OAuth 사용자**: 세 속성에 접근 권한 있는 구글 계정으로 OAuth(`analytics.readonly`). Make의 Google 커넥션이 갱신 처리
-
-### D-3. runReport 호출 형태
+### C-1. 메시지 전송 스크립트 작성
+`~/Scripts/send-imessage.applescript` — 받는 사람·내용을 인자로 받는 범용 전송기:
+```applescript
+on run argv
+  set targetHandle to item 1 of argv
+  set msgText to item 2 of argv
+  tell application "Messages"
+    set targetService to 1st service whose service type = iMessage
+    set targetBuddy to buddy targetHandle of targetService
+    send msgText to targetBuddy
+  end tell
+end run
 ```
-POST https://analyticsdata.googleapis.com/v1beta/properties/{PROPERTY_ID}:runReport
-Authorization: Bearer {GOOGLE_ACCESS_TOKEN}
-Content-Type: application/json
-
-{
-  "dateRanges": [
-    { "startDate": "yesterday", "endDate": "yesterday" },
-    { "startDate": "2daysAgo",  "endDate": "2daysAgo" }
-  ],
-  "metrics": [
-    { "name": "activeUsers" }, { "name": "newUsers" },
-    { "name": "sessions" },    { "name": "eventCount" }
-  ]
-}
+터미널에서 먼저 본인에게 단독 테스트:
+```bash
+osascript ~/Scripts/send-imessage.applescript "본인 핸들" "테스트 메시지"
 ```
-- 두 개의 dateRange(어제·그제)를 함께 요청해 **전일 대비 변동률**을 계산 → 조건 분기에 사용
+→ 처음 실행 시 macOS가 **"손쉬운 사용"** 권한을 요구하면 **시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용**에서 터미널(또는 스크립트를 실행하는 앱)을 허용한다.
+
+### C-2. 조건 분기 + 멘티 목록 스크립트
+`~/Scripts/mentoring-reminder.sh`:
+```bash
+#!/bin/zsh
+SEND_ENABLED="False"   # 안전 스위치 — True로 바꿔야만 실제 발송
+FRIDAY_PLAN="True"     # 조건 분기 — 단축어의 Text(True/False)와 1:1 대응
+SCRIPT="$HOME/Scripts/send-imessage.applescript"
+
+FRIDAY_MENTEES=(       # "iMessage 핸들|메시지" — 실제 연락처로 채운다
+  "멘티1(***)|규원 멘티! 이번 멘토링, 돌아오는 금요일 9시에 괜찮을까요?"
+  "멘티2(***)|민규 멘티! 이번 멘토링, 돌아오는 금요일 9시 30분에 괜찮을까요?"
+  "멘티3(***)|주원 멘티! 이번 멘토링, 돌아오는 금요일 10시에 괜찮을까요?"
+  "멘티4(***)|지강 멘티! 이번 멘토링, 돌아오는 금요일 10시 30분에 괜찮을까요?"
+)
+SATURDAY_MENTEES=(
+  "멘티1(***)|규원 멘티! 이번 멘토링, 돌아오는 토요일 11시에 괜찮을까요?"
+  "멘티2(***)|민규 멘티! 이번 멘토링, 돌아오는 토요일 18시에 괜찮을까요?"
+  "멘티3(***)|주원 멘티! 이번 멘토링, 돌아오는 토요일 18시 30분에 괜찮을까요?"
+  "멘티4(***)|지강 멘티! 이번 멘토링, 돌아오는 토요일 19시에 괜찮을까요?"
+)
+
+[ "$SEND_ENABLED" != "True" ] && { echo "$(date '+%F %T') skipped"; exit 0; }
+
+if [ "$FRIDAY_PLAN" = "True" ]; then MENTEES=("${FRIDAY_MENTEES[@]}"); PLAN="금요일"
+else MENTEES=("${SATURDAY_MENTEES[@]}"); PLAN="토요일"; fi
+
+for entry in "${MENTEES[@]}"; do
+  osascript "$SCRIPT" "${entry%%|*}" "${entry#*|}"
+  sleep 2
+done
+echo "$(date '+%F %T') sent $PLAN plan to ${#MENTEES[@]} mentees"
+```
+```bash
+chmod +x ~/Scripts/mentoring-reminder.sh
+```
+
+### C-3. launchd 스케줄 등록 (Trigger)
+`~/Library/LaunchAgents/com.jejelabs.mentoring.plist` — 매주 수요일 09:00 (Weekday: 0=일 … 6=토):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.jejelabs.mentoring</string>
+  <key>ProgramArguments</key>
+  <array><string>/bin/zsh</string><string>/Users/본인계정/Scripts/mentoring-reminder.sh</string></array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+  <key>StandardOutPath</key><string>/tmp/mentoring.log</string>
+  <key>StandardErrorPath</key><string>/tmp/mentoring.err</string>
+</dict>
+</plist>
+```
+등록·실행:
+```bash
+launchctl load ~/Library/LaunchAgents/com.jejelabs.mentoring.plist
+launchctl list | grep mentoring           # 로드 확인
+launchctl start com.jejelabs.mentoring    # 즉시 1회 실행 테스트 (스위치 False면 스킵 알림만 옴)
+cat /tmp/mentoring.log /tmp/mentoring.err # 발송/스킵 기록·실패 원인 확인
+```
+
+### C-4. 결과 확인 (두 분기 경로)
+- 멘티 핸들을 채우고 `SEND_ENABLED="True"`로 바꾼 뒤 (실수 발송 주의 — 캡처 후 다시 `False`로):
+  - `FRIDAY_PLAN="True"`로 1회 실행 → 금요일 시간표 문구 발송 확인
+  - `FRIDAY_PLAN="False"`로 1회 실행 → 토요일 시간표 문구 발송 확인
+- `launchctl list`로 로드 상태, `/tmp/mentoring.log`로 발송/스킵 이력 확인 (단축어보다 로그가 남는다 = 비교 포인트)
+
+> 📸 캡처: `p1-mentoring-script.png`, `p1-applescript.png`, `p1-launchd-plist.png`, `p1-launchd-log.png`, `p1-result-launchd-imessage.png`
 
 ---
 
-## E. Project 2 — Make 구현
+## D. Project 2 — `dash.jejelabs.com` 캡처 가이드
 
-1. **새 시나리오** → **Schedule** 트리거 `Every day, 09:00`
-2. **세 속성 조회**: `HTTP > Make a request`(또는 Make의 Google Analytics 모듈) 3개 — 각 Property ID로 D-3 본문 호출
-   - 또는 **Iterator**로 Property ID 배열을 순회해 모듈 1개로 반복
-3. **Tools > Set variable**로 속성별 변동률 계산
-4. **Router** → ⚠️강조 경로(±20%↑) / 일반 경로 — 각 경로 **Filter**
-5. **Text aggregator / Set variable**로 세 결과를 **HTML 표 한 개**로 합치기
-6. **Email > Send an email**(또는 HTTP로 Resend) — 합친 표를 본문으로 발송
-7. (보너스 1) 발송 전 **HTTP > Claude/GPT API** 호출해 요약 한 줄 추가
-8. (보너스 2) **Error handler** 라우트: 실패 시 카카오/메일 알림 + 임시 Google Sheets `Add a Row`
-9. **Run once** → 메일 수신 확인 → 실행 히스토리 캡처
+Project 2는 **처음부터 새로 빌드하는 것이 아니라 이미 운영 중인 시스템**(`jejelabs-metrics` 리포지토리, Cloudflare Workers + D1 + Telegram + Claude API)을 문서화한다. 아래는 그 실물에서 "구현 화면"과 "실행 결과"를 캡처하는 순서다.
 
-> 📸 캡처: `p2-make-scenario.png`, `p2-make-ga-module.png`, `p2-result-email.png`, `p2-branch-alert.png`, `p2-branch-normal.png`, (보너스) `p2-bonus-ai.png`, `p2-bonus-errorflow.png`
+### D-1. 구성(구현) 화면
+1. Cloudflare 대시보드 → Workers → `jejelabs-metrics` → **Triggers** 탭 — Cron 3개 목록 (계정 정보는 마스킹)
+2. **Settings → Domains & Routes** — `dash.jejelabs.com` 라우트 연결 화면
+3. Cloudflare **Zero Trust → Access → Applications** — `dash.jejelabs.com` 보호 규칙(팀 도메인 등은 마스킹)
+4. `wrangler.jsonc`의 `crons` 설정 부분 (시크릿 없음, 그대로 캡처 가능)
+
+### D-2. 대시보드 탭 실행 결과 (매출 탭 제외 5개)
+`dash.jejelabs.com` 접속(Access 로그인 필요) 후 각 탭 캡처 — 매출 탭은 수익 정보 노출을 피해 캡처에서 제외한다:
+1. **앱(분석)** — DAU·MAU 등 GA4 지표 화면
+2. **웹** — Cloudflare Web Analytics 사이트 트래픽 화면
+3. **리뷰** — 리뷰 대응 현황·AI 답글 화면
+4. **출시** — 버전·심사 상태 화면
+5. **링크** — 링크 생사 확인 화면
+
+### D-3. 조건 분기 — 두 경로 실행 증거
+- **정상/optional 경로**: 아직 출시 전이라 `optional`로 표시된 AdMob 계정의 "미사용" 상태 캡처
+- **에러/알림 경로**: 실제로 `ingest_log`에 `error`가 남은 항목이나 대시보드의 "확인 필요" 패널 캡처
+
+### D-4. 보너스 캡처
+- **보너스 1(매일 아침 알림)**: 텔레그램 봇의 08:00 일일 현황 리포트 메시지 — `p2-bonus-daily-report.png`
+- **보너스 2(리뷰 게시+실패 알림)**: `/draft`(Claude 초안) → `/say`(수정) → `/ok`(게시) 흐름 — `p2-bonus-ai-draft.png`, `p2-branch-edit.png`
+
+> 📸 캡처: `p2-tab-analytics.png`, `p2-tab-web.png`, `p2-tab-reviews.png`, `p2-tab-releases.png`, `p2-tab-links.png`, `p2-branch-admob-optional.png`, `p2-branch-admob-error.png`, `p2-bonus-daily-report.png`, `p2-bonus-ai-draft.png`, `p2-branch-edit.png`
 
 ---
 
-## F. 스크린샷 체크리스트
+## E. 스크린샷 체크리스트
 
-`b1-3/screenshots/` 폴더에 저장. 캡처 전 민감정보 `***` 마스킹 필수.
+`b1-3/screenshots/` 폴더에 저장. 캡처 전 민감정보(Apple ID·API 키·토큰·계정 이메일·도메인 내부 값) `***` 마스킹 필수.
 
 **Project 1**
-- [ ] `p1-shortcuts-overview.png` — 단축어 자동화 목록
-- [ ] `p1-shortcuts-actions.png` — 단축어 액션 구성
-- [ ] `p1-make-scenario.png` — Make 시나리오 캔버스
-- [ ] `p1-make-router.png` — Router/Filter 분기
-- [ ] `p1-result-weekday.png` / `p1-result-weekend.png` — 분기별 수신 메시지
-- [ ] `p1-result-shortcuts-kakao.png` / `p1-result-make-history.png` — 실행 결과
+- [x] `p1-shortcuts-overview.png` — 전체 알림 단축어 구성
+- [x] `p1-shortcuts-actions.png` — If True(금요일 시간표) 분기 액션
+- [x] `p1-shortcuts-otherwise.png` — Otherwise(토요일 시간표) 분기 액션
+- [x] `p1-result-shortcuts-imessage.png` — 실제 발송된 iMessage 대화창
+- [x] `p1-mentoring-script.png` — 분기·멘티 목록 셸 스크립트
+- [x] `p1-applescript.png` — AppleScript 스크립트 내용
+- [x] `p1-launchd-plist.png` — launchd plist 파일
+- [x] `p1-launchd-log.png` — `launchctl list` / 실행 로그
+- [x] `p1-result-launchd-imessage.png` — 자동 발송된 iMessage 수신 대화창(김예준)
 
 **Project 2**
-- [ ] `p2-make-scenario.png` — 시나리오 전체
-- [ ] `p2-make-ga-module.png` — GA4 조회 모듈
-- [ ] `p2-result-email.png` — 통합 리포트 수신 메일
-- [ ] `p2-branch-alert.png` / `p2-branch-normal.png` — 분기 경로
-- [ ] (보너스) `p2-bonus-ai.png` / `p2-bonus-errorflow.png`
-```
+- [x] `p2-tab-analytics.png` / `p2-tab-web.png` / `p2-tab-reviews.png` / `p2-tab-releases.png` / `p2-tab-links.png` — 5개 탭(매출 제외)
+- [ ] `p2-branch-admob-optional.png` — 정상/무시 분기
+- [ ] `p2-branch-admob-error.png` — 에러/알림 분기
+- [x] (보너스 1) `p2-bonus-daily-report.png` — 매일 아침 텔레그램 일일 현황
+- [x] (보너스 2) `p2-bonus-ai-draft.png` / `p2-branch-edit.png` — `/draft` 초안 → `/say` 수정 → `/ok` 게시
