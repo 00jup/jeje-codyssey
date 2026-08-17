@@ -311,8 +311,19 @@ def delete_prompt(prompts):
     print("프롬프트가 삭제되었습니다.")
 
 
-def show_top(prompts):
-    print("(조회수 Top 목록 기능은 이후 커밋에서 구현 예정입니다)")
+def show_top(prompts, top_n=5):
+    print(f"\n=== 조회수 Top {top_n} ===")
+    if not prompts:
+        print("등록된 프롬프트가 없습니다.")
+        return
+
+    ranked = sorted(prompts, key=lambda p: p["view_count"], reverse=True)[:top_n]
+    for rank, prompt in enumerate(ranked, 1):
+        star = " ⭐" if prompt["favorite"] else ""
+        print(
+            f"{rank}위. [{prompt['category']}] {prompt['title']}{star} "
+            f"- 조회수 {prompt['view_count']}"
+        )
 
 
 def save_to_json(prompts):
