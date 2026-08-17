@@ -150,8 +150,19 @@ def add_prompt(prompts):
 # --- 아래 기능들은 이후 커밋에서 순차적으로 구현한다 ---
 
 
+def format_prompt_line(index, prompt):
+    star = " ⭐" if prompt["favorite"] else ""
+    return f"{index}. [{prompt['category']}] {prompt['title']}{star}"
+
+
 def show_list(prompts):
-    print("(프롬프트 목록 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 프롬프트 목록 ===")
+    if not prompts:
+        print("등록된 프롬프트가 없습니다.")
+        return
+    for i, prompt in enumerate(prompts, 1):
+        print(format_prompt_line(i, prompt))
+    print(f"\n총 {len(prompts)}개의 프롬프트")
 
 
 def show_by_category(prompts):
