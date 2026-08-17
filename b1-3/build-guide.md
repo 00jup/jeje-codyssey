@@ -151,14 +151,13 @@ Project 2는 **처음부터 새로 빌드하는 것이 아니라 이미 운영 �
 5. **링크** — 링크 생사 확인 화면
 
 ### D-3. 조건 분기 — 두 경로 실행 증거
-- **정상/optional 경로**: 아직 출시 전이라 `optional`로 표시된 AdMob 계정의 "미사용" 상태 캡처
-- **에러/알림 경로**: 실제로 `ingest_log`에 `error`가 남은 항목이나 대시보드의 "확인 필요" 패널 캡처
+- 대시보드 하단 **"수집 상태" 패널** 한 장으로 두 경로를 보인다: AdMob 카드의 `미사용`(optional 정상 처리), 실패 시 같은 카드의 `error` 표시(부분 실패는 "실패 N" 인라인, 오래 안 돈 수집은 `지연`) — `p2-branch-ingest-status.png`
 
 ### D-4. 보너스 캡처
 - **보너스 1(매일 아침 알림)**: 텔레그램 봇의 08:00 일일 현황 리포트 메시지 — `p2-bonus-daily-report.png`
 - **보너스 2(리뷰 게시+실패 알림)**: `/draft`(Claude 초안) → `/say`(수정) → `/ok`(게시) 흐름 — `p2-bonus-ai-draft.png`, `p2-branch-edit.png`
 
-> 📸 캡처: `p2-tab-analytics.png`, `p2-tab-web.png`, `p2-tab-reviews.png`, `p2-tab-releases.png`, `p2-tab-links.png`, `p2-branch-admob-optional.png`, `p2-branch-admob-error.png`, `p2-bonus-daily-report.png`, `p2-bonus-ai-draft.png`, `p2-branch-edit.png`
+> 📸 캡처: `p2-tab-analytics.png`, `p2-tab-web.png`, `p2-tab-reviews.png`, `p2-tab-releases.png`, `p2-tab-links.png`, `p2-branch-ingest-status.png`, `p2-bonus-daily-report.png`, `p2-bonus-ai-draft.png`, `p2-branch-edit.png`
 
 ---
 
@@ -179,7 +178,6 @@ Project 2는 **처음부터 새로 빌드하는 것이 아니라 이미 운영 �
 
 **Project 2**
 - [x] `p2-tab-analytics.png` / `p2-tab-web.png` / `p2-tab-reviews.png` / `p2-tab-releases.png` / `p2-tab-links.png` — 5개 탭(매출 제외)
-- [ ] `p2-branch-admob-optional.png` — 정상/무시 분기
-- [ ] `p2-branch-admob-error.png` — 에러/알림 분기
+- [x] `p2-branch-ingest-status.png` — 수집 상태 패널(AdMob `미사용` 정상 처리 + 실패 시 `error`·`지연` 표시)
 - [x] (보너스 1) `p2-bonus-daily-report.png` — 매일 아침 텔레그램 일일 현황
 - [x] (보너스 2) `p2-bonus-ai-draft.png` / `p2-branch-edit.png` — `/draft` 초안 → `/say` 수정 → `/ok` 게시

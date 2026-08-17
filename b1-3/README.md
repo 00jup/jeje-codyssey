@@ -30,7 +30,7 @@
 - [x] Trigger 1개 이상 — 정해진 시각 / launchd 스케줄 / Cloudflare Cron
 - [x] Action 2개 이상 — 멘티별 전송×4(P1) / 소스 수집+리포트 발송(P2)
 - [x] 조건 분기 1개 이상 — 금요일/토요일 시간표(P1), 정상·optional/에러(P2)
-- [ ] 각 분기 경로 1회 이상 실행 결과 — P1 단축어 두 분기 구성+토요일 발송 캡처 확보, **P1 launchd 실행·P2 AdMob 분기 캡처 남음**
+- [x] 각 분기 경로 1회 이상 실행 결과 — P1 두 분기 구성+토요일 실제 발송+launchd 실행 로그, P2 수집 상태 패널(`미사용`/`실패`/`지연` 표시) 캡처 확보
 
 **Project 1**
 - [x] 서로 다른 2개 도구(단축어, AppleScript+launchd)
@@ -51,5 +51,5 @@
 
 - [x] 단축어·AppleScript+launchd 구현 캡처 (남은 것: `p1-launchd-log.png`, `p1-result-launchd-imessage.png`)
 - [x] `dash.jejelabs.com` 5개 탭(매출 제외) 캡처
-- [ ] AdMob 분기 두 경로(`p2-branch-admob-optional/error`) 캡처
+- [x] AdMob 분기 증거 — 수집 상태 패널 캡처(`p2-branch-ingest-status.png`)
 - [ ] **민감정보 마스킹** — API 키·토큰·Apple ID·이메일·멘티 이름·연락처·도메인 내부 식별값(vendor number·Property ID 등)은 `***` 처리
