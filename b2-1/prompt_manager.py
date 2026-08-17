@@ -82,8 +82,122 @@ DEFAULT_PROMPTS = [
 ]
 
 
+MENU = """
+=== 나만의 프롬프트 관리 ===
+1. 프롬프트 추가
+2. 프롬프트 목록
+3. 카테고리별 조회
+4. 프롬프트 검색
+5. 프롬프트 상세 보기
+6. 즐겨찾기 관리
+7. 즐겨찾기 목록
+8. 프롬프트 수정
+9. 프롬프트 삭제
+10. 조회수 Top 목록
+11. JSON으로 저장
+12. JSON에서 불러오기
+13. 카테고리별 Markdown 내보내기
+0. 종료
+"""
+
+
+def input_nonempty(label):
+    """공백이 아닌 값을 입력받을 때까지 재입력을 요청한다."""
+    while True:
+        value = input(label).strip()
+        if value:
+            return value
+        print("입력값이 비어 있습니다. 다시 입력해주세요.")
+
+
+def show_menu():
+    print(MENU)
+    return input("선택: ").strip()
+
+
+# --- 아래 기능들은 이후 커밋에서 순차적으로 구현한다 ---
+
+def add_prompt(prompts):
+    print("(프롬프트 추가 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def show_list(prompts):
+    print("(프롬프트 목록 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def show_by_category(prompts):
+    print("(카테고리별 조회 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def search_prompt(prompts):
+    print("(프롬프트 검색 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def show_detail(prompts):
+    print("(프롬프트 상세 보기 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def toggle_favorite(prompts):
+    print("(즐겨찾기 관리 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def show_favorites(prompts):
+    print("(즐겨찾기 목록 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def edit_prompt(prompts):
+    print("(프롬프트 수정 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def delete_prompt(prompts):
+    print("(프롬프트 삭제 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def show_top(prompts):
+    print("(조회수 Top 목록 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def save_to_json(prompts):
+    print("(JSON 저장 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def load_from_json(prompts):
+    print("(JSON 불러오기 기능은 이후 커밋에서 구현 예정입니다)")
+
+
+def export_markdown(prompts):
+    print("(Markdown 내보내기 기능은 이후 커밋에서 구현 예정입니다)")
+
+
 def main():
-    print("나만의 프롬프트 관리 프로그램을 준비 중입니다.")
+    prompts = [dict(p) for p in DEFAULT_PROMPTS]
+
+    actions = {
+        "1": add_prompt,
+        "2": show_list,
+        "3": show_by_category,
+        "4": search_prompt,
+        "5": show_detail,
+        "6": toggle_favorite,
+        "7": show_favorites,
+        "8": edit_prompt,
+        "9": delete_prompt,
+        "10": show_top,
+        "11": save_to_json,
+        "12": load_from_json,
+        "13": export_markdown,
+    }
+
+    while True:
+        choice = show_menu()
+        if choice == "0":
+            print("프로그램을 종료합니다.")
+            break
+        action = actions.get(choice)
+        if action is None:
+            print("잘못된 번호입니다. 메뉴에서 다시 선택해주세요.")
+            continue
+        action(prompts)
 
 
 if __name__ == "__main__":
