@@ -3,6 +3,11 @@
 터미널에서 메뉴 번호를 입력해 프롬프트를 추가/조회/검색/즐겨찾기 관리하는 콘솔 프로그램.
 """
 
+import json
+import os
+
+JSON_PATH = "prompts.json"
+
 CATEGORIES = ["텍스트 생성", "이미지 생성", "영상 생성", "페르소나", "자동화", "기타"]
 
 # 이전 미션(b1-1: 앱 컨버전 카피 에이전트 "프로모" 프롬프트 패키지)에서 작성한
@@ -327,11 +332,22 @@ def show_top(prompts, top_n=5):
 
 
 def save_to_json(prompts):
-    print("(JSON 저장 기능은 이후 커밋에서 구현 예정입니다)")
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(prompts, f, ensure_ascii=False, indent=2)
+    print(f"\n{len(prompts)}개의 프롬프트를 {JSON_PATH}에 저장했습니다.")
 
 
 def load_from_json(prompts):
-    print("(JSON 불러오기 기능은 이후 커밋에서 구현 예정입니다)")
+    if not os.path.exists(JSON_PATH):
+        print(f"\n{JSON_PATH} 파일이 없습니다. 먼저 저장을 실행해주세요.")
+        return
+
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        loaded = json.load(f)
+
+    prompts.clear()
+    prompts.extend(loaded)
+    print(f"\n{JSON_PATH}에서 {len(prompts)}개의 프롬프트를 불러왔습니다.")
 
 
 def export_markdown(prompts):
