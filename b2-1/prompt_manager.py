@@ -246,11 +246,29 @@ def show_detail(prompts):
 
 
 def toggle_favorite(prompts):
-    print("(즐겨찾기 관리 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 즐겨찾기 관리 ===")
+    raw = input("프롬프트 번호 입력: ").strip()
+    prompt = get_prompt_by_number(prompts, raw)
+    if prompt is None:
+        print("잘못된 번호입니다.")
+        return
+
+    prompt["favorite"] = not prompt["favorite"]
+    if prompt["favorite"]:
+        print(f"'{prompt['title']}' 프롬프트를 즐겨찾기에 추가했습니다!")
+    else:
+        print(f"'{prompt['title']}' 프롬프트를 즐겨찾기에서 해제했습니다!")
 
 
 def show_favorites(prompts):
-    print("(즐겨찾기 목록 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 즐겨찾기 목록 ===")
+    matched = [(i, p) for i, p in enumerate(prompts, 1) if p["favorite"]]
+    if not matched:
+        print("즐겨찾기한 프롬프트가 없습니다.")
+        return
+    for i, prompt in matched:
+        print(format_prompt_line(i, prompt))
+    print(f"\n총 {len(matched)}개의 즐겨찾기")
 
 
 def edit_prompt(prompts):
