@@ -197,7 +197,22 @@ def show_by_category(prompts):
 
 
 def search_prompt(prompts):
-    print("(프롬프트 검색 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 프롬프트 검색 ===")
+    keyword = input_nonempty("검색어: ")
+    keyword_lower = keyword.lower()
+    matched = [
+        (i, p)
+        for i, p in enumerate(prompts, 1)
+        if keyword_lower in p["title"].lower() or keyword_lower in p["content"].lower()
+    ]
+
+    print("\n검색 결과:")
+    if not matched:
+        print("검색 결과가 없습니다.")
+        return
+    for i, prompt in matched:
+        print(format_prompt_line(i, prompt))
+    print(f"\n{len(matched)}개의 프롬프트를 찾았습니다.")
 
 
 def show_detail(prompts):
