@@ -215,8 +215,34 @@ def search_prompt(prompts):
     print(f"\n{len(matched)}개의 프롬프트를 찾았습니다.")
 
 
+def get_prompt_by_number(prompts, raw_number):
+    if not raw_number.isdigit():
+        return None
+    index = int(raw_number) - 1
+    if 0 <= index < len(prompts):
+        return prompts[index]
+    return None
+
+
 def show_detail(prompts):
-    print("(프롬프트 상세 보기 기능은 이후 커밋에서 구현 예정입니다)")
+    print("\n=== 프롬프트 상세 보기 ===")
+    raw = input("번호 입력: ").strip()
+    prompt = get_prompt_by_number(prompts, raw)
+    if prompt is None:
+        print("잘못된 번호입니다.")
+        return
+
+    prompt["view_count"] += 1
+    star = " ⭐" if prompt["favorite"] else " (없음)"
+    divider = "─" * 30
+    print(f"\n{divider}")
+    print(f"제목: {prompt['title']}")
+    print(f"카테고리: {prompt['category']}")
+    print(f"즐겨찾기:{star}")
+    print(divider)
+    print("내용:")
+    print(prompt["content"])
+    print(divider)
 
 
 def toggle_favorite(prompts):
