@@ -68,6 +68,14 @@ python3 prompt_manager.py
   `export_markdown` — 보너스 기능
 - `main` — 메뉴 루프 및 함수 라우팅
 
+## 제출 스크린샷
+
+| 파일 | 내용 |
+|---|---|
+| [`screenshots/dev-environment-vscode.png`](./screenshots/dev-environment-vscode.png) | 개발 환경 — VSCode에서 `prompt_manager.py` 편집 화면 |
+| [`screenshots/program-run-menu-list-top.png`](./screenshots/program-run-menu-list-top.png) | 프로그램 실행 — 메뉴, 프롬프트 목록, 조회수 Top 목록 |
+| [`screenshots/git-log-graph.png`](./screenshots/git-log-graph.png) | `git log --oneline --graph` — 브랜치 생성·병합(`feature/prompt-list` → `main`) 이력 |
+
 ## Git 작업 방식
 
 - `main` 브랜치 외에 `feature/prompt-list` 브랜치를 생성해 "프롬프트 목록" 기능을
