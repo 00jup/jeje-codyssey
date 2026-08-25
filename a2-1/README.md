@@ -155,6 +155,28 @@ Gemini 이미지 응답은 API가 지원하는 JPEG로 받은 뒤 프로그램�
 결과 JSON은 각 단계가 끝날 때마다 갱신된다. 중간 API 호출이 실패해도 앞 단계의
 성공 결과는 남고 다음 단계는 계속 실행된다.
 
+### 실제 실행 결과
+
+예제 [`brief.json`](./brief.json)을 실행해 생성한 결과다. 전체 텍스트 결과와 생성
+설정은 [`sample_output/brand_result.json`](./sample_output/brand_result.json)에서
+확인할 수 있으며, 아래 이미지를 누르면 원본 PNG가 열린다.
+
+#### 1. 컬러 팔레트
+
+[![브랜드 컬러 팔레트](./sample_output/color_palette.png)](./sample_output/color_palette.png)
+
+#### 2. 기하 스타일 로고 시안
+
+[![기하 스타일 로고 시안](./sample_output/logo_01.png)](./sample_output/logo_01.png)
+
+#### 3. 유기적 스타일 로고 시안
+
+[![유기적 스타일 로고 시안](./sample_output/logo_02.png)](./sample_output/logo_02.png)
+
+#### 4. 엠블럼 스타일 로고 시안
+
+[![엠블럼 스타일 로고 시안](./sample_output/logo_03.png)](./sample_output/logo_03.png)
+
 ## 오류 처리
 
 - 브리프 파일 없음, JSON 문법 오류, 필수 필드 누락은 API 호출 전에 안내하고 종료한다.
