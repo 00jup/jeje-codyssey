@@ -37,8 +37,9 @@ python travel_planner.py --date "2026-03-15"
    ```
 2. `.env` 파일을 열어 아래 두 값을 채운다.
    - `GEMINI_API_KEY`: [Google AI Studio](https://aistudio.google.com/apikey)에서 발급.
+     - `403 PERMISSION_DENIED` 또는 `404 ... no longer available`가 뜨면, 발급 시 자동 생성된 프로젝트가 문제인 경우가 많다. "Create API key in new project"로 새 프로젝트에서 키를 다시 만들면 대부분 해결된다.
    - `KAKAO_REST_API_KEY`: [Kakao Developers](https://developers.kakao.com/) 콘솔 > 내 애플리케이션 > 앱 키 > **REST API 키**.
-     - Kakao Local API가 401/403을 반환하면 앱 키 값과 "플랫폼 > Web" 도메인 등록 여부를 점검한다.
+     - Kakao Local API가 401/403을 반환하면 (1) Admin 키/JavaScript 키가 아닌 **REST API 키**를 넣었는지, (2) 좌측 메뉴 `제품 설정 > 카카오맵`이 활성화(ON) 상태인지 순서로 점검한다.
 3. 키를 설정하지 않고 실행하면 프로그램이 즉시 종료되며, 어떤 키가 빠졌는지와 설정 방법을 안내한다.
 
 ## API 키 유출 주의 사항
