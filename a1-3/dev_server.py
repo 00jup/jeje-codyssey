@@ -23,8 +23,14 @@ sys.path.insert(0, os.path.join(ROOT, "api"))
 
 # .env 를 읽는다. 배포 환경에서는 Vercel 이 환경 변수를 직접 넣어주므로 이 코드가
 # 서버리스 함수 쪽에는 없다 — 로컬에만 필요한 편의다.
-env_path = os.path.join(ROOT, ".env")
-if os.path.exists(env_path):
+#
+# a1-3/.env 가 없으면 같은 저장소의 b2-2/.env 를 본다. 이 저장소의 과제들이 같은
+# Gemini 키를 쓰고 있어서, 과제마다 키를 복사해 두면 폐기할 때 하나를 빠뜨리게 된다.
+# 두 파일 모두 .gitignore 에 있고 값을 출력하지 않는다.
+for env_path in (os.path.join(ROOT, ".env"),
+                 os.path.join(os.path.dirname(ROOT), "b2-2", ".env")):
+    if not os.path.exists(env_path):
+        continue
     with open(env_path, encoding="utf-8") as fp:
         for line in fp:
             line = line.strip()
@@ -32,6 +38,8 @@ if os.path.exists(env_path):
                 continue
             key, _, value = line.partition("=")
             os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+    if os.environ.get("GEMINI_API_KEY"):
+        break
 
 import draft  # noqa: E402  (경로를 먼저 잡아야 import 가 된다)
 import reply  # noqa: E402

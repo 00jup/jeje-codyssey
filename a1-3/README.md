@@ -108,6 +108,16 @@ cp .env.example .env
 `.env` 는 [`.gitignore`](./.gitignore)에 있어 커밋되지 않는다. `dev_server.py` 가
 이 파일을 읽어 `os.environ` 에 넣는다.
 
+`a1-3/.env` 가 없으면 같은 저장소의 `b2-2/.env` 를 대신 본다 — 이 저장소의 과제들이
+같은 Gemini 키를 쓰고 있어서, 과제마다 키를 복사해 두면 폐기할 때 하나를 빠뜨리게
+된다. 이 대체 경로는 **로컬 개발 서버에만** 있고 배포되는 서버리스 함수에는 없다.
+
+| 우선순위 | 키를 찾는 곳 |
+| ---: | --- |
+| 1 | 셸 환경변수 `GEMINI_API_KEY` |
+| 2 | `a1-3/.env` |
+| 3 | `b2-2/.env` |
+
 ### 배포 (Vercel)
 
 Vercel 대시보드 → 프로젝트 → **Settings → Environment Variables** 에서
