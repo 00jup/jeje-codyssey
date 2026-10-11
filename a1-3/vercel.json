@@ -1,17 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
   "functions": {
-    "api/draft.py": {
-      "memory": 512,
+    "api/compose.py": {
       "maxDuration": 30,
       "includeFiles": "api/_shared.py"
     },
-    "api/reply.py": {
-      "memory": 512,
-      "maxDuration": 30,
+    "api/letter.py": {
+      "maxDuration": 15,
       "includeFiles": "api/_shared.py"
     }
   },
+  "rewrites": [
+    { "source": "/:id([a-z0-9][a-z0-9-]{1,18}[a-z0-9])", "destination": "/read.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -1,0 +1,123 @@
+/* read.html 전용 — 거부 버튼이 도망가는 화면과 편지 공개 연출.
+   토큰·버튼·카드 기본기는 style.css 를 그대로 물려받는다. */
+
+.read-body {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+}
+
+.read-wrap {
+  padding: clamp(2rem, 8vw, 4rem) 0;
+  width: min(560px, 100% - 2.5rem);
+}
+
+.state[hidden] { display: none; }
+
+.read-title {
+  font-size: clamp(1.6rem, 6vw, 2.3rem);
+  letter-spacing: -.03em;
+  margin-top: .3rem;
+}
+
+/* ── 재치 대사 말풍선 ─────────────────────────────────────────────────── */
+.taunt {
+  margin-top: 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: .8rem 1.1rem;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--accent);
+  box-shadow: var(--shadow);
+  animation: taunt-pop .25s ease both;
+}
+@keyframes taunt-pop {
+  from { opacity: 0; transform: translateY(-4px) scale(.97); }
+}
+
+/* ── 아레나: 수락은 그대로, 거부는 도망 ──────────────────────────────── */
+.arena {
+  position: relative;
+  min-height: clamp(240px, 46vh, 380px);
+  margin-top: 1.6rem;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.arena-btn {
+  position: absolute;
+  z-index: 2; /* 반짝이 트레일(z-index:1)보다 위 — 클릭할 자리가 가려지면 안 된다 */
+  min-width: 7.5rem;
+  transform: translate(-50%, -50%);
+}
+
+#acceptBtn {
+  left: 50%;
+  top: 50%;
+}
+
+.dodge-btn {
+  left: 50%;
+  top: 72%;
+  transition: left .16s cubic-bezier(.34, 1.56, .64, 1),
+              top .16s cubic-bezier(.34, 1.56, .64, 1);
+  touch-action: none;
+  animation: wiggle 1.4s ease-in-out infinite; /* 눌리기도 전에 미리 쫄아 있다 */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dodge-btn { animation: none; }
+}
+
+.arena-hint {
+  margin-top: .9rem;
+  font-size: .84rem;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+/* ── 편지 공개 ─────────────────────────────────────────────────────────── */
+.letter-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(1.4rem, 4vw, 2rem);
+  margin-top: 1rem;
+  box-shadow: var(--shadow);
+  animation: reveal-in .4s cubic-bezier(.2, .8, .2, 1) both;
+  overflow: hidden;
+}
+.letter-card .deco-item { cursor: default; }
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+}
+
+.letter-title {
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  margin-bottom: .8rem;
+}
+
+.letter-meta {
+  display: flex; flex-wrap: wrap; gap: 0 .9rem;
+  font-size: .85rem; color: var(--ink-3);
+  margin-bottom: 1.2rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.letter-body {
+  white-space: pre-wrap;
+  font-size: 1.02rem;
+  line-height: 1.85;
+}
+
+.read-wrap > .btn { margin-top: 1.4rem; }
+
+@media (max-width: 560px) {
+  .arena { min-height: clamp(220px, 52vh, 340px); }
+  .arena-btn { min-width: 6.4rem; font-size: .88rem; padding: .6rem 1rem; }
+}

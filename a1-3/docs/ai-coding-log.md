@@ -1,6 +1,9 @@
 # AI 코딩 도구 사용 기록
 
-도구: **Claude Code (Opus 5)** · 작업일 2026-08-30 · 작업 시간 약 1시간
+2026-10-11 배포 작업의 실제 대화 발췌와 수정 내역은 [Codex 대화 기록](./2026-10-11-codex-log.md)에 있다.
+아래는 이전 개발 과정 기록이다. 최종 버전은 Claude만 사용한다.
+
+도구: **Claude Code (Opus 5)** · 작업일 2026-08-30 ~ 2026-09-11
 
 대화 화면 캡처는 [`../screenshots/ai-tool/`](../screenshots/ai-tool/) 에 넣는다.
 이 문서는 그 캡처가 무엇을 보여주는지, 그리고 **AI가 준 코드를 그대로 쓰지 않고
@@ -8,123 +11,93 @@
 
 ---
 
-## 1. 무엇을 시켰나
+## 1. 진행 순서 — 중간에 기획을 완전히 바꿨다
 
-기존 사내 대시보드(`jejelabs-metrics`, Cloudflare Worker + TypeScript)에 있던
-"AI 리뷰 답글 초안" 기능의 **프롬프트 설계 원칙만** 가져와, 과제 요구 스택
-(바닐라 프론트 + Vercel Python 서버리스 + AI API)으로 새로 만들라고 지시했다.
+처음엔 "타래공방"이라는 다른 서비스(Threads 타래·답글 AI 초안 도구)로 시작해
+동작까지 확인했다. 그런데 사용자가 "아예 다른 걸로 하자"며 **거부 버튼이
+도망가는 장난 편지**(거부불가) 아이디어를 새로 제안했고, 브레인스토밍을
+다시 거쳐 이 서비스로 전면 교체했다. 코드는 재사용하지 않고 `api/`,
+`index.html`, `css/`, `js/` 를 전부 새로 짰다 — 프롬프트 설계 원칙(자료와
+지시를 구분한다, 화이트리스트로 선택지를 거른다 등)만 이어졌다.
 
-가져온 원칙은 셋이다.
-
-| 원칙 | 원본에서 배운 이유 |
-| --- | --- |
-| 답글은 **댓글의 언어**로 쓴다 | 한국 스토어에 영어로 남긴 리뷰에 한국어 답글이 나간 사고가 있었다 |
-| **없는 기능을 인정하지 않는다** | 동조하려고 사실을 양보하면 그 답글이 공개로 남는다 |
-| **초안까지만** 만든다 | 자동 게시는 되돌릴 수 없다 |
-
-코드는 한 줄도 복사하지 않았다. TypeScript/Cloudflare 구조는 이 과제의 제약
-(Python/Vercel)과 맞지 않고, 원본 저장소는 비공개다.
+이 경험에서 남긴 교훈: **AI 코딩 도구를 쓴다고 첫 아이디어에 매몰될 필요가
+없다.** 로컬 프로토타입까지 다 만든 뒤에도, 더 나은 아이디어가 나오면 갈아
+엎는 비용이 처음부터 손으로 짤 때보다 훨씬 낮았다.
 
 ---
 
 ## 2. AI가 낸 것을 그대로 쓰지 않은 지점
 
-이 절이 이 문서의 핵심이다. "시키는 대로"가 아니라 **왜 고쳤는지**를 남긴다.
+### 2-1. AI 게이트웨이가 문서와 다르게 동작했다
 
-### 2-1. `api/_shared.py` 를 두 함수가 import 하지 못하는 문제
+Codyssey 과정에서 발급받은 AI 게이트웨이(`copa.codyssey.kr`)로 OpenAI SDK의
+`response_format`(JSON 스키마 강제) 을 그대로 썼더니 이런 응답이 왔다:
 
-첫 코드는 `from _shared import ...` 만 있었다. 로컬에서는 잘 돌지만
-**배포하면 `ModuleNotFoundError` 가 난다** — Vercel은 각 `.py` 를 따로 번들하고,
-번들에 안 실린 파일은 존재하지 않는다.
-
-고친 것 두 가지:
-
-```python
-# api/_shared.py — 배포 환경의 작업 디렉터리가 달라서 경로를 직접 잡아준다
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+```
+400 {"error": {"message": "Requested feature is not supported.",
+               "code": "unsupported_feature"}}
 ```
 
-```jsonc
-// vercel.json — 번들에 _shared.py 를 같이 싣는다
-"functions": { "api/draft.py": { "includeFiles": "api/_shared.py" } }
-```
+`json_schema` 모드도, 더 단순한 `json_object` 모드도 둘 다 막혀 있었다 —
+실제 OpenAI API라면 되는 기능이 이 프록시에서는 프로토콜만 흉내 내고
+지원하지 않는 것이었다. 문서(코드 예제)만 믿었으면 배포하고 나서야 알았을
+문제다. **직접 최소 재현 스크립트로 호출해 확인했기 때문에** 로컬에서 바로
+잡을 수 있었다.
 
-**배운 것:** 로컬에서 되는 것이 배포에서 되는 것과 같지 않다. 특히 파일 경로와
-환경 변수는 두 환경이 다른 방식으로 주입한다.
+고친 것: `response_format` 을 버리고, 프롬프트에 JSON 스키마를 문장으로
+적어 "설명 없이 JSON 객체 하나만 출력하라"고 요청한 뒤, 응답 텍스트에서
+정규식으로 `{...}` 를 뽑아 파싱하는 방식으로 바꿨다(`api/_shared.py` 의
+`openai_json`/`anthropic_json`). 형식이 어긋나면 한 번만 다시 시킨다.
 
-### 2-2. 로컬 개발 서버가 응답을 안 하고 멈춘 문제
+### 2-2. 로컬 개발 서버가 응답 없이 멈추는 문제 (이전 버전에서 이어짐)
 
-`dev_server.py` 의 첫 버전은 API 요청을 이렇게 넘겼다.
+`dev_server.py` 초안이 `/api/compose` 요청을 `route.do_POST(self)` 로
+그대로 넘겼는데, `self` 는 `_shared.BaseHandler` 가 기대하는 `run()`이
+없어 동작하지 않았다. 그렇다고 핸들러를 정식으로 생성하면
+`BaseHTTPRequestHandler.__init__` 이 그 순간 소켓을 다시 읽어버려 연결을
+두 번 잡는 꼴이 됐다. `route.__new__(route)` 로 `__init__` 없이 만들고
+`headers`/`rfile`/`wfile`/`send_response` 등 필요한 속성만 현재 연결에서
+빌려주는 방식으로 고쳤다.
 
-```python
-route.do_POST(self)      # ← 여기가 틀렸다
-```
+### 2-3. 거부 버튼이 아레나 가장자리에서 잘려 보였다
 
-`self` 는 개발 서버의 핸들러라서 `_shared.JsonHandler` 가 쓰는 `self.run()` 과
-`self._send()` 를 갖고 있지 않다. 그렇다고 `route(...)` 로 정상 생성하면
-`BaseHTTPRequestHandler.__init__` 이 **생성되는 순간 요청을 다시 파싱하고 통신까지
-해버려서** 같은 연결을 두 번 잡는다.
+`place(x, y)` 함수가 버튼 중심 좌표를 아레나 가로세로에서 28px 여백만 두고
+클램프했는데, 버튼 자체의 절반 너비(약 50px)를 고려하지 않아 가장자리에
+가까운 위치로 도망가면 `overflow: hidden` 컨테이너에 잘려 반쪽만 보였다.
+`declineBtn.offsetWidth/2 + 10` 을 실제 여백으로 써서 고쳤다.
 
-`__init__` 없이 만들고 소켓·헤더만 빌려주는 쪽으로 바꿨다.
+### 2-4. 수락 버튼을 누르려 하면 화면이 깜빡였다
 
-```python
-proxy = route.__new__(route)          # __init__ 을 부르지 않는다
-proxy.headers, proxy.rfile, proxy.wfile = self.headers, self.rfile, self.wfile
-proxy.send_response = self.send_response
-proxy.end_headers = super().end_headers   # 중복 헤더를 피한다
-getattr(proxy, method)()
-```
+실제로 마우스를 움직여 눌러보고 나서야 발견한 문제다. 원인이 두 개
+겹쳐 있었다:
 
-**배운 것:** 오류 메시지 없이 "그냥 멈추는" 증상은 대개 소켓을 두 곳에서 잡을 때다.
-스택 트레이스가 안 나온다고 원인이 없는 게 아니다.
+1. 마우스 반짝이 트레일이 `z-index` 없이 버튼 위에 그려지고 있었다 →
+   버튼에 명시적 `z-index`를 주고 반짝이는 그 아래로 내렸다.
+2. 거부 버튼의 도망 위치가 수락 버튼과 85px만 떨어지면 되도록 되어 있어,
+   마우스가 수락 버튼에 다가갈 때마다 근처의 거부 버튼이 계속 재배치되며
+   깜빡이는 것처럼 보였다 → 제외 반경을 130px로 넓혔다.
 
-### 2-3. `"오늘 할 이야기을(를) 입력해 주세요"`
+코드만 읽어서는 두 원인 다 "버그"로 보이지 않는다 — 실제로 커서를 움직여
+보지 않으면 걸리지 않는 종류의 문제였다.
 
-AI가 낸 안내문은 조사를 괄호로 처리했다. 실제 화면에서 눈에 걸려 계산으로 바꿨다.
+### 2-5. 헤드리스 크롬 스크린샷이 레이아웃 버그처럼 보였다
 
-```python
-def josa(word, with_batchim, without):
-    last = word[-1]
-    if "가" <= last <= "힣":
-        return with_batchim if (ord(last) - 0xAC00) % 28 else without
-    return without
-```
+390px 창 크기로 스크린샷을 찍었더니 헤더의 햄버거 버튼이 잘려 보였다.
+`document.documentElement.clientWidth` 를 찍어보니 요청한 크기와 무관하게
+항상 485px로 고정돼 있었다 — 두 개의 다른 Chrome 빌드(일반 설치본,
+Playwright의 "Chrome for Testing")에서 똑같이 재현돼, 이 macOS 환경의
+헤드리스 렌더러가 가진 최소 창 크기 제약으로 결론지었다. `scrollWidth`
+가 `clientWidth` 와 정확히 같다는 걸 여러 폭에서 확인해, 실제 CSS
+버그가 아니라 스크린샷 도구의 한계임을 구분했다.
 
-→ "받은 댓글**을**", "오늘 할 이야기**를**"
+### 2-6. 한글 이름을 URL에 못 쓰는 문제
 
-### 2-4. 모델이 500자를 넘긴 조각을 낼 때
-
-프롬프트에 "500자를 넘기지 마라"고 적어도 가끔 넘는다. 그대로 내보내면 사용자가
-붙여넣는 순간 Threads가 게시를 거부한다. 서버에서 한 번 더 자르게 했다.
-
-```python
-pieces = [p[:THREADS_LIMIT] for p in pieces][:5]
-```
-
-**배운 것:** 프롬프트는 지시이고 코드는 보장이다. 지켜야 하는 규칙은 코드에도 둔다.
-
-### 2-5. `<select>` 값을 프롬프트에 그대로 넣던 코드
-
-말투·조각 수 값이 프롬프트 문장에 직접 들어가고 있었다. 브라우저에서 `<select>`
-값을 바꾸면 임의 문장을 프롬프트에 심을 수 있다. 서버에서 화이트리스트로 거르게
-바꿨다.
-
-```python
-def pick(data, key, allowed, default):
-    return allowed.get(str(data.get(key) or "").strip(), allowed[default])
-```
-
-### 2-6. 반응형이 깨진 줄 알았던 건
-
-헤드리스 브라우저로 390px 스크린샷을 찍었더니 화면이 잘려 보여서 레이아웃이
-깨진 줄 알았다. 실제로 재보니 **헤드리스 크롬이 뷰포트를 485px 아래로 못 줄이는**
-것이었고, 레이아웃은 멀쩡했다.
-
-```js
-document.documentElement.scrollWidth === document.documentElement.clientWidth  // true
-```
-
-**배운 것:** 스크린샷은 증상이지 원인이 아니다. 숫자로 재기 전에는 고치지 않는다.
+"링크를 보내는/받는 사람 이름으로 만들어 달라"는 요청에서, 이름이 대부분
+한글이라 그대로는 URL 슬러그가 될 수 없었다. 외부 라이브러리를 추가하는
+대신, 국어의 로마자 표기법 매핑표(초성 19개·중성 21개·종성 28개)를 그대로
+코드에 옮기고 유니코드 연산(`(코드 - 0xAC00)` 을 21×28로 나눈 몫·나머지)으로
+초성/중성/종성을 분리해 이어 붙이는 함수를 직접 짰다. "하은"→"haeun",
+"태민"→"taemin" 처럼 예외 규칙 없이도 실용적인 수준으로 맞는다.
 
 ---
 
@@ -132,14 +105,20 @@ document.documentElement.scrollWidth === document.documentElement.clientWidth  /
 
 AI가 짠 코드를 믿지 않고 순서대로 확인했다.
 
-1. `python3 -c "import ast; ast.parse(...)"` — 문법
-2. `node --check js/app.js` — 프론트 문법
-3. `curl` 로 엔드포인트 6가지 경우 확인 (정상 / 빈 값 / 초과 / 잘못된 JSON / GET / 영어 댓글)
-4. 헤드리스 크롬으로 400·768·1440px에서 `scrollWidth === clientWidth` 측정
-5. 다크 모드에서 실제 AI 호출까지 돌려 화면 확인
+1. `python3 -c "import ast; ast.parse(...)"` — 각 Python 파일 문법
+2. `node --check` — 각 JS 파일 문법
+3. AI 게이트웨이 두 프로토콜(OpenAI/Anthropic)을 **실제로 호출**해 응답 형식부터
+   확인(2-1의 문제를 여기서 발견)
+4. `curl` 로 엔드포인트 여러 경우 확인 — 정상 / 빈 값 / 초과 / 잘못된 JSON /
+   GET / 이름 충돌(접미사 부여) / 없는 편지 / 스티커 화이트리스트
+5. 헤드리스 크롬으로 여러 폭에서 `scrollWidth === clientWidth` 측정(픽셀
+   스크린샷보다 이 수치를 신뢰했다 — 2-5 참고)
+6. `element.getAnimations()` 로 CSS 애니메이션이 실제로 `running` 상태인지
+   확인(정적 스크린샷 두 장으로는 움직임을 비교할 수 없어서)
+7. 실제 브라우저로 스티커 드래그, 링크 복사, 다크 모드까지 눈으로 확인
 
-3번의 마지막(영어 댓글 → 영어 답글)이 이 서비스의 핵심 검증이다.
-결과는 [`../README.md#7-테스트-기록`](../README.md) 에 있다.
+가장 핵심적인 검증은 3번이다 — 문서(엔드포인트 표)만 보고 코드를 짰다면
+`response_format` 문제를 배포하고 나서야 알았을 것이다.
 
 ---
 
@@ -149,10 +128,12 @@ AI가 짠 코드를 믿지 않고 순서대로 확인했다.
 
 | 파일 | 내용 |
 | --- | --- |
-| `01-requirements.png` | 무엇을 만들지 지시한 첫 대화 |
-| `02-api-implementation.png` | 서버리스 함수 코드를 만들어 가는 과정 |
-| `03-debugging.png` | 위 2-1 또는 2-2의 오류를 잡는 과정 |
+| `01-requirements.png` | "거부불가" 아이디어를 브레인스토밍하는 대화 |
+| `02-api-implementation.png` | 편지 생성 서버리스 함수를 만들어 가는 과정 |
+| `03-debugging.png` | 2-1(게이트웨이 unsupported_feature) 또는 2-4(버튼 깜빡임)를 잡는 과정 |
 | `04-verification.png` | `curl` 로 엔드포인트를 검증하는 화면 |
 
 키가 화면에 보이지 않는지 확인하고 올린다. `.env` 파일 내용이나 터미널의
-환경 변수 출력이 찍히지 않게 한다.
+환경 변수 출력이 찍히지 않게 한다. (실제로 이 프로젝트 진행 중 대화창에
+API 키를 직접 붙여넣은 적이 있었는데, 그 구간은 캡처에서 제외했다 — 이 과제가
+AI 대화 캡처를 요구한다는 걸 알고 있었기 때문에 바로 조치했다.)

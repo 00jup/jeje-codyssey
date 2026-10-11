@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>편지가 도착했습니다 — 거부불가</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/read.css">
+</head>
+<body class="read-body">
+
+<div class="wrap narrow read-wrap">
+
+  <!-- 로딩 -->
+  <div class="state" id="stateLoading">
+    <div class="skeleton">
+      <div class="sk-line short"></div>
+      <div class="sk-line"></div>
+      <div class="sk-line"></div>
+    </div>
+  </div>
+
+  <!-- 없는 편지 -->
+  <div class="state" id="stateMissing" hidden>
+    <p class="eyebrow">앗</p>
+    <h1 class="read-title">이 편지는 사라졌습니다</h1>
+    <p class="lede">링크가 만료됐거나 잘못 복사됐을 수 있다.</p>
+    <a class="btn btn-primary" href="/#compose">새 편지 만들러 가기</a>
+  </div>
+
+  <!-- 도착: 거부 버튼이 도망가는 화면 -->
+  <div class="state" id="stateArena" hidden>
+    <p class="eyebrow" id="arenaEyebrow">편지가 도착했습니다 💌</p>
+    <h1 class="read-title" id="arenaTitle">확인하시겠습니까?</h1>
+    <p class="lede" id="arenaFrom"></p>
+
+    <div class="taunt" id="taunt" aria-live="polite" hidden></div>
+
+    <div class="arena" id="arena">
+      <span class="meme-doodle" style="left:4%;top:12%" aria-hidden="true">👉👈</span>
+      <span class="meme-doodle" style="right:5%;top:18%;animation-delay:.5s" aria-hidden="true">🥺</span>
+      <span class="meme-doodle" style="left:8%;bottom:8%;animation-delay:1s" aria-hidden="true">😭</span>
+      <button class="btn btn-primary arena-btn" id="acceptBtn" type="button">수락 ✅</button>
+      <button class="btn btn-ghost arena-btn dodge-btn" id="declineBtn" type="button">거부</button>
+    </div>
+
+    <p class="arena-hint">거부 버튼이 잘 안 눌린다면… 그런 뜻이다. 👀</p>
+  </div>
+
+  <!-- 공개된 편지 -->
+  <div class="state" id="stateReveal" hidden>
+    <p class="eyebrow">수락됨 🎉</p>
+    <article class="letter-card">
+      <h1 class="letter-title" id="revealTitle"></h1>
+      <div class="letter-meta">
+        <span id="revealTo"></span>
+        <span id="revealFrom"></span>
+        <span id="revealWhere" hidden></span>
+      </div>
+      <div class="letter-body" id="revealBody"></div>
+    </article>
+    <a class="btn btn-ghost btn-wide" href="/#compose">나도 만들어보기 ✨</a>
+  </div>
+
+</div>
+
+<script src="js/stickers.js"></script>
+<script src="js/read.js"></script>
+</body>
+</html>

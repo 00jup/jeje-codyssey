@@ -1,0 +1,12 @@
+.env
+.env.*
+.venv/
+__pycache__/
+*.py[cod]
+node_modules/
+.DS_Store
+dev_server.py
+docs/
+screenshots/
+README.md
+tests/

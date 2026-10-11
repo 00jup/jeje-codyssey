@@ -1,14 +1,12 @@
 /*
- * 타래공방 — 프론트엔드
+ * 거부불가 — index.html(홈/편지 만들기/사용법/소개) 프론트엔드
  *
- * 하는 일: 해시 라우팅, 테마 기억, 글자 수, 폼 → fetch → 화면 반영, 복사.
- * 하지 않는 일: API 키를 아는 것. 키는 서버리스 함수만 안다 — 프론트가 키를 들고
- * 있으면 브라우저 개발자 도구에서 그대로 읽힌다.
+ * 하는 일: 해시 라우팅, 테마 기억, 글자 수, 편지 짓기 폼 → fetch → 결과 렌더, 복사.
+ * 하지 않는 일: AI 키를 아는 것. 키는 서버리스 함수만 안다.
  */
 (function () {
   'use strict';
 
-  /* ── 작은 도구 ────────────────────────────────────────────────────── */
   var $  = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
@@ -33,9 +31,8 @@
   }
 
   /* ── 라우팅 ───────────────────────────────────────────────────────────
-     한 번에 한 섹션만 보인다. 스크롤 앵커가 아니라 진짜 화면 전환이라
-     주소를 그대로 공유하면 같은 화면이 열린다. */
-  var PAGES = ['home', 'draft', 'reply', 'guide', 'about'];
+     한 번에 한 섹션만 보인다. 주소 그대로 공유하면 같은 화면이 열린다. */
+  var PAGES = ['home', 'compose', 'guide', 'about'];
 
   function show(name, push) {
     if (PAGES.indexOf(name) < 0) name = 'home';
@@ -46,9 +43,8 @@
       else a.removeAttribute('aria-current');
     });
 
-    var title = { home: '', draft: '타래 짓기', reply: '답글 짓기',
-                  guide: '사용법', about: '소개' }[name];
-    document.title = (title ? title + ' · ' : '') + '타래공방';
+    var title = { home: '', compose: '편지 만들기', guide: '사용법', about: '소개' }[name];
+    document.title = (title ? title + ' · ' : '') + '거부불가';
 
     if (push && location.hash !== '#' + name) history.pushState(null, '', '#' + name);
     closeMenu();
@@ -92,8 +88,8 @@
     document.documentElement.setAttribute('data-theme', v);
     themeLabel.textContent = LABEL[v];
     try {
-      if (v === 'auto') localStorage.removeItem('tarae-theme');
-      else localStorage.setItem('tarae-theme', v);
+      if (v === 'auto') localStorage.removeItem('geobulga-theme');
+      else localStorage.setItem('geobulga-theme', v);
     } catch (_) { /* 프라이빗 모드에서 막힐 수 있다. 기능을 죽이진 않는다. */ }
   }
 
@@ -120,7 +116,7 @@
        1) 빈 입력 — 보내기 전에 막는다
        2) API 오류(4xx/5xx) — 서버가 준 message 를 그대로 쓴다
        3) 지연/타임아웃 — AbortController 로 끊고 안내한다 */
-  var TIMEOUT_MS = 25000;
+  var TIMEOUT_MS = 30000;
 
   function postJSON(url, body) {
     var ctrl = new AbortController();
@@ -143,7 +139,7 @@
       });
     }).catch(function (err) {
       if (err.name === 'AbortError') {
-        var t = new Error('응답이 25초를 넘겼습니다. 소재를 조금 줄이거나 잠시 후 다시 시도해 주세요.');
+        var t = new Error('응답이 30초를 넘겼습니다. 잠시 후 다시 시도해 주세요.');
         t.code = 'TIMEOUT';
         throw t;
       }
@@ -172,13 +168,17 @@
     box.appendChild(a);
   }
 
-  function copyBtn(getText) {
-    var b = el('button', 'copy', '복사');
+  function copyBtn(getText, label) {
+    var b = el('button', 'copy', label || '복사');
     b.type = 'button';
     b.addEventListener('click', function () {
       var text = getText();
-      var done = function () { toast('복사했습니다'); b.textContent = '복사됨'; 
-        setTimeout(function () { b.textContent = '복사'; }, 1500); };
+      var done = function () {
+        toast('복사했습니다');
+        var prev = b.textContent;
+        b.textContent = '복사됨';
+        setTimeout(function () { b.textContent = prev; }, 1500);
+      };
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(done, function () { legacy(text, done); });
       } else { legacy(text, done); }
@@ -198,172 +198,186 @@
     document.body.removeChild(ta);
   }
 
-  function pieceCard(no, total, text, limit) {
-    var card = el('article', 'piece');
-    card.style.animationDelay = (no - 1) * 60 + 'ms';
+  /* ── 편지지 꾸미기: 스티커 · 사진 ─────────────────────────────────────
+     스티커는 이름(id)만 서버로 보낸다 — 그림은 read.html 도 같은
+     js/stickers.js 를 갖고 있어서 그때 그려진다. 사진만 base64 로 실제
+     담아 보낸다. 업로드 즉시 캔버스로 줄여서(가로 640px, JPEG) 편지가
+     너무 무거워지지 않게 한다. */
+  var decorations = [];
+  var MAX_DECOS = 6;
+  var MAX_PHOTOS = 2;
+  var PHOTO_MAX_EDGE = 640;
 
-    var head = el('div', 'piece-head');
-    head.appendChild(el('span', 'piece-no', no + ' / ' + total));
-    head.appendChild(copyBtn(function () { return text; }));
+  var decoCanvas = $('#decoCanvas');
+  var decoPalette = $('#decoPalette');
+  var photoInput = $('#photoInput');
 
-    var len = el('span', 'piece-len', text.length + ' / ' + limit);
-    if (text.length > limit * 0.9) len.classList.add('tight');
-    head.appendChild(len);
-
-    card.appendChild(head);
-    card.appendChild(el('div', 'piece-body', text));
-    return card;
+  function redrawDeco() {
+    if (window.Geobulga) window.Geobulga.renderDecoLayer(decoCanvas, decorations, true, redrawDeco);
   }
 
-  /* ── 타래 짓기 ────────────────────────────────────────────────────── */
-  wireForm({
-    form: '#draftForm',
-    box: '#draftResult',
-    required: [['#topic', '오늘 할 이야기를 한 줄이라도 적어 주세요.']],
-    skeletonLines: 5,
-    payload: function () {
-      return {
-        topic: $('#topic').value,
-        audience: $('#audience').value,
-        tone: $('#tone').value,
-        count: $('#count').value,
-        hashtags: $('#hashtags').checked
-      };
-    },
-    url: '/api/draft',
-    render: function (box, data) {
-      box.textContent = '';
-      var limit = data.limit || 500;
-
-      data.pieces.forEach(function (t, i) {
-        box.appendChild(pieceCard(i + 1, data.pieces.length, t, limit));
-      });
-
-      if (data.pieces.length > 1) {
-        var all = el('div', 'piece');
-        var h = el('div', 'piece-head');
-        h.appendChild(el('span', 'piece-no', '전체'));
-        h.appendChild(copyBtn(function () { return data.pieces.join('\n\n---\n\n'); }));
-        all.appendChild(h);
-        all.appendChild(el('div', 'piece-body', '조각 ' + data.pieces.length + '개를 한 번에 복사한다.'));
-        box.appendChild(all);
-      }
-
-      if (data.hashtags && data.hashtags.length) {
-        var tags = el('div', 'tags');
-        data.hashtags.forEach(function (t) { tags.appendChild(el('span', null, t)); });
-        box.appendChild(tags);
-      }
-
-      if (data.hookReason) {
-        var note = el('div', 'note');
-        note.appendChild(el('strong', null, '첫 문장을 이렇게 연 이유 · '));
-        note.appendChild(el('span', null, data.hookReason));
-        box.appendChild(note);
-      }
-    }
-  });
-
-  /* ── 답글 짓기 ────────────────────────────────────────────────────── */
-  wireForm({
-    form: '#replyForm',
-    box: '#replyResult',
-    required: [['#comment', '답할 댓글을 붙여 넣어 주세요.']],
-    skeletonLines: 4,
-    payload: function () {
-      return {
-        post: $('#post').value,
-        comment: $('#comment').value,
-        intent: $('#intent').value,
-        tone: $('#replyTone').value
-      };
-    },
-    url: '/api/reply',
-    render: function (box, data) {
-      box.textContent = '';
-
-      var meta = el('div', 'tags');
-      var kind = el('span', 'badge', data.kind);
-      kind.setAttribute('data-kind', data.kind);
-      meta.appendChild(kind);
-      if (data.language) meta.appendChild(el('span', null, data.language + '로 씀'));
-      box.appendChild(meta);
-
-      [['짧은 답', data.short], ['자세한 답', data.long]].forEach(function (pair, i) {
-        var card = el('article', 'piece');
-        card.style.animationDelay = i * 60 + 'ms';
-        var head = el('div', 'piece-head');
-        head.appendChild(el('span', 'piece-no', pair[0]));
-        head.appendChild(copyBtn(function () { return pair[1]; }));
-        head.appendChild(el('span', 'piece-len', pair[1].length + '자'));
-        card.appendChild(head);
-        card.appendChild(el('div', 'piece-body', pair[1]));
-        box.appendChild(card);
-      });
-
-      var note = el('div', 'note');
-      note.appendChild(el('strong', null, '올리기 전에 · '));
-      note.appendChild(el('span', null,
-        data.caution || '초안이다. 사실 관계를 직접 확인하고 올린다.'));
-      box.appendChild(note);
-    }
-  });
-
-  /* ── 폼 배선 ───────────────────────────────────────────────────────── */
-  function wireForm(cfg) {
-    var form = $(cfg.form);
-    if (!form) return;
-    var box = $(cfg.box);
-    var btn = $('[data-submit]', form);
-    var busy = false;
-
-    // 사용자가 고치기 시작하면 오류 표시를 지운다.
-    form.addEventListener('input', function (e) {
-      e.target.removeAttribute('aria-invalid');
-    });
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (busy) return;
-
-      // 1) 빈 입력 — 서버까지 가지 않는다
-      for (var i = 0; i < cfg.required.length; i++) {
-        var input = $(cfg.required[i][0]);
-        if (!input.value.trim()) {
-          input.setAttribute('aria-invalid', 'true');
-          input.focus();
-          box.textContent = '';
-          var a = el('div', 'alert');
-          a.appendChild(el('strong', null, '입력이 필요합니다'));
-          a.appendChild(el('span', null, cfg.required[i][1]));
-          box.appendChild(a);
-          return;
-        }
-        input.removeAttribute('aria-invalid');
-      }
-
-      busy = true;
-      var label = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = '';
-      btn.appendChild(el('span', 'spin'));
-      btn.appendChild(el('span', null, '만드는 중…'));
-      skeleton(box, cfg.skeletonLines);
-
-      postJSON(cfg.url, cfg.payload())
-        .then(function (data) { cfg.render(box, data); })
-        .catch(function (err) { fail(box, err); })
-        .finally(function () {
-          busy = false;
-          btn.disabled = false;
-          btn.textContent = label;
+  if (window.Geobulga && decoPalette) {
+    window.Geobulga.STICKER_ORDER.forEach(function (id) {
+      var b = el('button', 'deco-sticker-btn');
+      b.type = 'button';
+      b.innerHTML = window.Geobulga.STICKERS[id];
+      b.setAttribute('aria-label', id + ' 스티커 추가');
+      b.addEventListener('click', function () {
+        if (decorations.length >= MAX_DECOS) { toast('스티커·사진은 최대 ' + MAX_DECOS + '개까지'); return; }
+        decorations.push({
+          kind: 'sticker', src: id,
+          x: 30 + Math.random() * 40, y: 30 + Math.random() * 40,
+          scale: 1, rotation: Math.round(Math.random() * 20 - 10)
         });
+        redrawDeco();
+      });
+      decoPalette.appendChild(b);
     });
+
+    var photoBtn = el('button', 'deco-photo-btn', '📷');
+    photoBtn.type = 'button';
+    photoBtn.setAttribute('aria-label', '사진 추가');
+    photoBtn.addEventListener('click', function () { photoInput.click(); });
+    decoPalette.appendChild(photoBtn);
+  }
+
+  photoInput.addEventListener('change', function () {
+    var file = photoInput.files[0];
+    photoInput.value = '';
+    if (!file) return;
+    var photoCount = decorations.filter(function (d) { return d.kind === 'photo'; }).length;
+    if (photoCount >= MAX_PHOTOS) { toast('사진은 최대 ' + MAX_PHOTOS + '장까지'); return; }
+    if (decorations.length >= MAX_DECOS) { toast('스티커·사진은 최대 ' + MAX_DECOS + '개까지'); return; }
+
+    var img = new Image();
+    var reader = new FileReader();
+    reader.onload = function () { img.src = reader.result; };
+    img.onload = function () {
+      var scale = Math.min(1, PHOTO_MAX_EDGE / Math.max(img.width, img.height));
+      var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+      var cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      decorations.push({
+        kind: 'photo', src: cv.toDataURL('image/jpeg', .82),
+        x: 50, y: 50, scale: 1.6, rotation: Math.round(Math.random() * 10 - 5)
+      });
+      redrawDeco();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  /* ── 편지 만들기 ──────────────────────────────────────────────────── */
+  var form = $('#composeForm');
+  var box = $('#composeResult');
+  var btn = $('[data-submit]', form);
+  var busy = false;
+
+  form.addEventListener('input', function (e) { e.target.removeAttribute('aria-invalid'); });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (busy) return;
+
+    var required = [
+      ['#receiverName', '받는 사람 이름을 입력해 주세요.'],
+      ['#senderName', '보내는 사람 이름을 입력해 주세요.'],
+      ['#note', '무슨 얘기인지 적어 주세요.']
+    ];
+    for (var i = 0; i < required.length; i++) {
+      var input = $(required[i][0]);
+      if (!input.value.trim()) {
+        input.setAttribute('aria-invalid', 'true');
+        input.focus();
+        box.textContent = '';
+        var a = el('div', 'alert');
+        a.appendChild(el('strong', null, '입력이 필요합니다'));
+        a.appendChild(el('span', null, required[i][1]));
+        box.appendChild(a);
+        return;
+      }
+      input.removeAttribute('aria-invalid');
+    }
+
+    busy = true;
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '';
+    btn.appendChild(el('span', 'spin'));
+    btn.appendChild(el('span', null, '짓는 중…'));
+    skeleton(box, 5);
+
+    var payload = {
+      situation: $('#situation').value,
+      receiverName: $('#receiverName').value,
+      senderName: $('#senderName').value,
+      location: $('#location').value,
+      note: $('#note').value,
+      tone: $('#tone').value,
+      provider: $('#provider').value,
+      customId: $('#customId').value,
+      decorations: decorations
+    };
+
+    postJSON('/api/compose', payload)
+      .then(function (data) { renderResult(box, data); })
+      .catch(function (err) {
+        fail(box, err);
+        if (err.code === 'ID_TAKEN' || err.code === 'RESERVED_ID' || err.code === 'BAD_CUSTOM_ID') {
+          $('#customId').setAttribute('aria-invalid', 'true');
+          $('#customId').focus();
+        }
+      })
+      .finally(function () {
+        busy = false;
+        btn.disabled = false;
+        btn.textContent = label;
+      });
+  });
+
+  var linkPrefix = $('#linkPrefix');
+  if (linkPrefix) linkPrefix.textContent = location.host + '/';
+
+  function renderResult(box, data) {
+    box.textContent = '';
+    var letter = data.letter;
+    var url = location.origin + '/' + data.id;
+
+    var preview = el('div', 'letter-preview');
+    preview.appendChild(el('h3', null, letter.title));
+    var meta = 'To. ' + letter.receiverName + '  ·  From. ' + letter.senderName +
+      (letter.location ? '  ·  ' + letter.location : '');
+    preview.appendChild(el('p', 'meta', meta));
+    preview.appendChild(el('div', 'body', letter.body));
+    box.appendChild(preview);
+
+    var linkBox = el('div', 'link-box');
+    linkBox.appendChild(el('code', null, url));
+    linkBox.appendChild(copyBtn(function () { return url; }, '링크 복사'));
+    box.appendChild(linkBox);
+
+    var links = el('div', 'result-links');
+    var preview2 = el('a', 'btn btn-ghost');
+    preview2.href = '/' + data.id;
+    preview2.target = '_blank';
+    preview2.rel = 'noopener';
+    preview2.textContent = '받는 사람 화면 미리보기';
+    links.appendChild(preview2);
+    box.appendChild(links);
+
+    var note = el('div', 'note');
+    note.appendChild(el('strong', null, '마음에 안 든다면 · '));
+    var noteMsg = '위 "편지 만들기"를 다시 누르면 새로 짓는다.';
+    if (letter.decorations && letter.decorations.length) {
+      noteMsg += ' 꾸민 스티커/사진 ' + letter.decorations.length + '개는 그대로 유지된다.';
+    }
+    note.appendChild(el('span', null, noteMsg));
+    box.appendChild(note);
   }
 
   /* ── 시작 ─────────────────────────────────────────────────────────── */
   var saved = null;
-  try { saved = localStorage.getItem('tarae-theme'); } catch (_) {}
+  try { saved = localStorage.getItem('geobulga-theme'); } catch (_) {}
   applyTheme(saved === 'light' || saved === 'dark' ? saved : 'auto');
   show(currentHash(), false);
 })();
