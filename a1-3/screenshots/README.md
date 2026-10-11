@@ -1,50 +1,36 @@
 # 제출용 스크린샷
 
-아래 이름 그대로 넣으면 [`../README.md`](../README.md) 의 8절 표와 맞는다.
+2026-10-11에 실제 배포 URL **https://geobulga.vercel.app**에서 촬영했다.
+브라우저 페이지 캡처이므로 주소창은 포함하지 않는다. 접속 주소와 테스트 결과는
+[배포 검증 기록](../docs/배포검증.md)에 함께 기록했다.
 
-## 준비
+## 데스크톱 — 1440 × 1000
 
-```bash
-cd a1-3
-source .venv/bin/activate
-python3 dev_server.py     # 또는 배포 URL 로 찍는다 — 배포본이 더 좋다
-```
-
-**배포 URL로 찍는 편이 낫다.** 주소창에 `.vercel.app` 도메인이 보이면 그 자체가
-"배포된 서비스가 동작한다"는 증빙이 된다.
-
-## 찍기 전에 확인
-
-- 주소창·화면 어디에도 API 키가 보이지 않는지
-- 개발자 도구가 열려 있다면 Network 탭에 키가 보이지 않는지
-- `.env` 파일이 열린 에디터가 화면에 같이 찍히지 않는지
-
-## desktop/ — 브라우저 폭 1440px 정도
-
-| 파일 | 무엇을 |
+| 파일 | 내용 |
 | --- | --- |
-| `01-home.png` | 홈 화면 전체. 상단 메뉴 4개가 보이게 |
-| `02-compose-result.png` | **편지 만들기** — 입력을 채우고 AI가 편지+링크를 만들어 낸 상태 |
-| `03-arena.png` | **받는 사람 화면** — 짧은 링크를 열어 거부 버튼이 도망가는 중인 화면(재치 대사가 보이게) |
-| `04-reveal.png` | 수락을 눌러 편지가 공개된 화면(스티커/사진 꾸밈이 있으면 같이) |
-| `05-error.png` | 빈 입력으로 제출해 안내 문구가 뜬 상태, 또는 없는 링크로 들어가 "사라진 편지" 화면 |
-| `06-dark.png` | 헤더의 테마 버튼을 눌러 다크 모드로 바꾼 화면 |
+| [01-home.png](desktop/01-home.png) | 홈, 4개 메뉴, 여행 초대 기능 소개 |
+| [02-compose-result.png](desktop/02-compose-result.png) | 정상 입력에 대한 실제 Claude 편지와 공유 링크 |
+| [03-arena.png](desktop/03-arena.png) | 받는 사람 화면, 도망가는 거부 버튼과 장난 대사 |
+| [04-reveal.png](desktop/04-reveal.png) | 수락 후 실제 저장된 편지 공개 |
+| [05-error.png](desktop/05-error.png) | 빈 입력 안내 |
+| [06-dark.png](desktop/06-dark.png) | 다크 모드 홈 |
 
-## mobile/ — 실제 폰 또는 개발자 도구 디바이스 툴바(iPhone 14 Pro, 390px)
+## 모바일 — 390 × 844, 터치 에뮬레이션
 
-| 파일 | 무엇을 |
+| 파일 | 내용 |
 | --- | --- |
-| `01-home.png` | 홈. 햄버거 버튼이 보이게 |
-| `02-compose.png` | 모바일에서 편지 만들기 폼(스티커 팔레트 포함) |
-| `03-arena.png` | 모바일에서 거부 버튼이 도망가는 화면 |
+| [01-home.png](mobile/01-home.png) | 모바일 홈 |
+| [02-menu.png](mobile/02-menu.png) | 열린 모바일 메뉴 |
+| [02-compose.png](mobile/02-compose.png) | 모바일 입력 폼과 스티커 팔레트 |
+| [03-arena.png](mobile/03-arena.png) | 긴 입력 공유 편지, 터치 거부 시 장난 대사 |
+| [04-compose-result.png](mobile/04-compose-result.png) | 254자 입력과 실제 Claude 결과·링크 |
+| [05-reveal.png](mobile/05-reveal.png) | 수락 후 사진·스티커가 포함된 저장 편지 공개 |
 
-## ai-tool/ — AI 코딩 도구 사용 과정
+사진은 **PHOTO TEST** 테스트 이미지다. API 키·환경 파일은 캡처에 포함하지 않았다.
+전체 페이지 캡처 파일은 화면의 세로 길이가 뷰포트보다 길 수 있다.
 
-| 파일 | 무엇을 |
-| --- | --- |
-| `01-requirements.png` | "거부불가" 아이디어를 브레인스토밍하는 대화 |
-| `02-api-implementation.png` | 편지 생성 서버리스 함수를 만들어 가는 과정 |
-| `03-debugging.png` | 오류(AI 게이트웨이 응답 형식, 버튼 깜빡임 등)를 잡는 과정 |
-| `04-verification.png` | `curl` 로 엔드포인트를 검증하는 화면 |
+## AI 코딩 도구 사용 과정
 
-무엇을 담을지는 [`../docs/ai-coding-log.md`](../docs/ai-coding-log.md) 4절 참고.
+과제에서 허용하는 **대화 로그** 방식으로
+[실제 Codex 대화 발췌와 오류 수정 기록](../docs/2026-10-11-codex-log.md)을 제출한다.
+[이전 개발 과정 기록](../docs/ai-coding-log.md)도 함께 보관했다.
