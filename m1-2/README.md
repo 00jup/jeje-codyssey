@@ -13,7 +13,7 @@
   - 100일 이상의 시계열 데이터를 바탕으로 일평균, 최고/최저 실적, 성장 트렌드 자동 산출
   - 데이터 요약을 주입받은 AI 비서가 점주님의 자연어 질문에 정확한 근거와 비즈니스 인사이트를 제시
 - **배포 URL**:
-  - **프론트엔드 (Vercel)**: `https://storesense-ai.vercel.app` (배포 예정 URL)
+  - **프론트엔드 (Vercel)**: `https://frontend-omega-tawny-50.vercel.app`
   - **백엔드 API (Render)**: `https://storesense-api.onrender.com` (배포 예정 URL)
   - **Swagger API 문서**: `https://storesense-api.onrender.com/docs`
 
