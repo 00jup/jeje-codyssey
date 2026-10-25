@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스마트스토어 AI 비서 — 매출 분석 & 데이터 관리</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 상단 헤더 -->
+  <header class="app-header">
+    <div class="logo-area">
+      <span class="logo-icon">📊</span>
+      <h1 class="app-title">StoreSense AI</h1>
+      <span class="app-subtitle">스마트스토어 매출 분석 & AI 비서</span>
+    </div>
+    <div class="header-actions">
+      <div id="serverStatusBadge" class="status-badge">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">서버 확인 중...</span>
+      </div>
+      <button id="btnConfigApi" class="btn-secondary" title="API 주소 설정">⚙️ API 설정</button>
+    </div>
+  </header>
+
+  <!-- 메인 레이아웃 -->
+  <div class="app-container">
+    <!-- 왼쪽 사이드바: 대화 기록 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <button id="btnNewChat" class="btn-new-chat">
+          <span>💬</span>
+          <span>새 대화 시작</span>
+        </button>
+      </div>
+      <div class="sidebar-section-title">이전 대화 기록</div>
+      <ul id="conversationList" class="conversation-list">
+        <!-- JS 렌더링 -->
+      </ul>
+    </aside>
+
+    <!-- 중앙/우측 메인 영역 -->
+    <main class="main-content">
+      <!-- 1. 데이터 요약 위젯 배너 (항상 상단에 요약 상태 표시) -->
+      <section class="summary-container">
+        <div class="summary-cards-grid">
+          <div class="summary-card">
+            <span class="summary-label">분석 기간 및 총 영업일</span>
+            <span id="summaryPeriod" class="summary-val">-</span>
+            <span id="summaryCount" class="summary-sub">기록된 데이터: 0개</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">누적 총 매출액</span>
+            <span id="summaryTotal" class="summary-val">- 원</span>
+            <span class="summary-sub" style="color: var(--primary); font-weight: 600;">실시간 집계</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">일평균 매출</span>
+            <span id="summaryAverage" class="summary-val">- 원</span>
+            <span id="summaryTrendBadge" class="trend-badge neutral">트렌드 분석 중</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">최고 매출 기록일</span>
+            <span id="summaryMax" class="summary-val">- 원</span>
+            <span id="summaryMaxDate" class="summary-sub">최고일: -</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 탭 바 (AI 비서 대화 / 매출 데이터 관리) -->
+      <div class="tabs-bar">
+        <div class="tabs-group">
+          <button id="tabChatBtn" class="tab-btn active">🤖 AI 비서 대화</button>
+          <button id="tabDataBtn" class="tab-btn">📋 매출 데이터 관리 (CRUD)</button>
+        </div>
+        <button id="btnRefreshAll" class="btn-secondary" title="요약 및 데이터 새로고침">🔄 새로고침</button>
+      </div>
+
+      <!-- 3-A. 탭 패널: AI 비서 채팅 -->
+      <section id="chatPanel" class="tab-panel active">
+        <div class="chat-window">
+          <!-- 채팅 메시지 창 -->
+          <div id="chatMessages" class="chat-messages">
+            <!-- 초기 환영 메시지 -->
+            <div class="chat-bubble assistant">
+              안녕하세요! 스마트스토어 AI 매출 분석 비서입니다. 🏪<br>
+              매장의 최근 실적이나 트렌드, 최고/최저 매출에 대해 무엇이든 물어보세요!
+              <div class="chat-bubble-time">AI 비서</div>
+            </div>
+          </div>
+
+          <!-- 로딩 인디케이터 -->
+          <div id="typingIndicator" class="typing-indicator" style="display: none; margin-left: 20px;">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+
+          <!-- 추천 질문 칩 -->
+          <div class="prompt-chips-area">
+            <button class="chip-btn" data-query="이번 달 실적이 어때?">💡 이번 달 실적이 어때?</button>
+            <button class="chip-btn" data-query="가장 실적이 좋았던 때는 언제고 얼마야?">🏆 가장 실적이 좋았던 날은?</button>
+            <button class="chip-btn" data-query="최근 매출 추세와 매장 운영 조언을 해줘">📈 최근 매출 추세와 조언</button>
+            <button class="chip-btn" data-query="평균 매출과 총 누적 매출 요약해줘">📊 누적 및 일평균 매출 요약</button>
+          </div>
+
+          <!-- 입력 바 -->
+          <form id="chatForm" class="chat-input-bar">
+            <input 
+              type="text" 
+              id="chatInput" 
+              class="chat-input" 
+              placeholder="데이터에 대해 질문해보세요 (예: '이번 달 실적이 어때?')" 
+              autocomplete="off"
+            />
+            <button type="submit" id="btnSendChat" class="btn-send">
+              <span>전송</span>
+              <span>➤</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 3-B. 탭 패널: 매출 데이터 관리 (CRUD) -->
+      <section id="dataPanel" class="tab-panel">
+        <div class="data-table-container">
+          <div class="table-toolbar">
+            <div class="table-title">
+              <span>시계열 매출 데이터</span>
+              <span id="tableDataCount" class="badge-count">0건</span>
+            </div>
+            <div class="table-actions">
+              <button id="btnOpenAddModal" class="btn-primary">+ 새 데이터 추가</button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 130px;">기록 일자</th>
+                  <th style="width: 140px;">일 매출액</th>
+                  <th>메모 / 비고</th>
+                  <th style="width: 140px;">관리</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody">
+                <!-- JS 렌더링 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 데이터 추가 / 수정 모달 -->
+  <div id="dataModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">매출 데이터 추가</h3>
+        <button id="btnCloseModal" class="modal-close">&times;</button>
+      </div>
+      <form id="dataForm">
+        <input type="hidden" id="editDataId" value="">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="inputDate">기록 일자 (date)</label>
+            <input type="date" id="inputDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inputValue">일 매출액 (원, value)</label>
+            <input type="number" id="inputValue" class="form-input" min="0" step="1000" placeholder="예: 620000" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inputMemo">메모 / 특이사항 (memo)</label>
+            <input type="text" id="inputMemo" class="form-input" placeholder="예: 주말 단체 주문 및 신메뉴 프로모션" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnCancelModal" class="btn-secondary">취소</button>
+          <button type="submit" id="btnSaveData" class="btn-primary">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS 파일 로드 (바닐라 모듈) -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
