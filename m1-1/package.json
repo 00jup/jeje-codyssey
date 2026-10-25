@@ -1,0 +1,11 @@
+{
+  "name": "samsung-stock-timeseries-dashboard",
+  "version": "1.0.0",
+  "description": "삼성전자 주가 시계열 분석 인터랙티브 대시보드 (Vercel Ready)",
+  "scripts": {
+    "start": "serve public"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
