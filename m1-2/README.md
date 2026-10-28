@@ -14,8 +14,8 @@
   - 데이터 요약을 주입받은 AI 비서가 점주님의 자연어 질문에 정확한 근거와 비즈니스 인사이트를 제시
 - **배포 URL**:
   - **프론트엔드 (Vercel)**: `https://frontend-omega-tawny-50.vercel.app`
-  - **백엔드 API (Render)**: `https://storesense-api.onrender.com` (배포 예정 URL)
-  - **Swagger API 문서**: `https://storesense-api.onrender.com/docs`
+  - **백엔드 API (Vercel)**: `https://storesense-api.vercel.app`
+  - **Swagger API 문서**: `https://storesense-api.vercel.app/docs`
 
 ---
 
@@ -28,7 +28,7 @@
 | **Database** | Google Cloud Firebase Firestore | NoSQL 문서 기반 DB (`data`, `conversations` 컬렉션) |
 | **AI / LLM** | OpenAI API (`gpt-4o-mini`) | 시계열 요약 정보 컨텍스트 주입 기반 자연어 생성 |
 | **Frontend** | Vanilla HTML5, Modern CSS3, JavaScript (ES6+) | 프레임워크 없는 순수 바닐라 웹 앱 (SPA 대시보드) |
-| **Deployment** | Render (백엔드), Vercel (프론트엔드) | 클라우드 플랫폼 배포 및 환경 변수 기반 운영 |
+| **Deployment** | Vercel (프론트엔드·백엔드) | 클라우드 플랫폼 배포 및 환경 변수 기반 운영 |
 
 ---
 
@@ -73,7 +73,7 @@ OPENAI_MODEL=gpt-4o-mini
 # Firebase Firestore 연동 (아래 중 1가지 선택)
 # 방법 A: 서비스 계정 키 파일 경로 지정
 FIREBASE_SERVICE_ACCOUNT_KEY_PATH=./firebase-service-account.json
-# 방법 B: Render 배포 등에서 JSON 문자열 통째로 지정할 때
+# 방법 B: Vercel 배포 등에서 JSON 문자열 통째로 지정할 때
 # FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
 
 # CORS 허용 도메인 (쉼표 구분)
@@ -146,7 +146,7 @@ python3 -m http.server 3000
 - 이를 통해 모델은 사전 학습 지식이 아닌 **시스템 프롬프트에 명시된 점포의 실제 매출 수치와 통계 사실(Fact)**만을 기준으로 정확한 답변을 생성하게 되며, 환각(Hallucination) 현상을 방지합니다.
 
 ### Q6. 배포 환경에서 CORS / 환경변수 / 키 관리가 왜 필요한지?
-- **CORS (Cross-Origin Resource Sharing)**: 프론트엔드(Vercel: `*.vercel.app`)와 백엔드(Render: `*.onrender.com`)가 서로 다른 도메인에 호스팅되므로 브라우저의 동일 출처 정책(SOP)에 의해 차단되지 않도록 허용 오리진을 설정해야 합니다.
+- **CORS (Cross-Origin Resource Sharing)**: 프론트엔드와 백엔드가 서로 다른 Vercel 도메인에 호스팅되므로 브라우저의 동일 출처 정책(SOP)에 차단되지 않도록 허용 오리진을 설정해야 합니다.
 - **환경 변수 및 키 관리**: OpenAI API 키나 Firebase 서비스 계정 키 같은 비밀 인증 정보를 Git 저장소에 하드코딩하면 심각한 보안 침해와 크레딧 탈취가 발생할 수 있으므로, 플랫폼 환경 변수(Render/Vercel Environment Variables)로 격리하여 안전하게 주입해야 합니다.
 
 ---
