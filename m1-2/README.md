@@ -147,7 +147,7 @@ python3 -m http.server 3000
 
 ### Q6. 배포 환경에서 CORS / 환경변수 / 키 관리가 왜 필요한지?
 - **CORS (Cross-Origin Resource Sharing)**: 프론트엔드와 백엔드가 서로 다른 Vercel 도메인에 호스팅되므로 브라우저의 동일 출처 정책(SOP)에 차단되지 않도록 허용 오리진을 설정해야 합니다.
-- **환경 변수 및 키 관리**: OpenAI API 키나 Firebase 서비스 계정 키 같은 비밀 인증 정보를 Git 저장소에 하드코딩하면 심각한 보안 침해와 크레딧 탈취가 발생할 수 있으므로, 플랫폼 환경 변수(Render/Vercel Environment Variables)로 격리하여 안전하게 주입해야 합니다.
+- **환경 변수 및 키 관리**: OpenAI API 키나 Firebase 서비스 계정 키 같은 비밀 인증 정보를 Git 저장소에 하드코딩하면 심각한 보안 침해와 크레딧 탈취가 발생할 수 있으므로, Vercel Environment Variables로 격리하여 안전하게 주입해야 합니다.
 
 ---
 
